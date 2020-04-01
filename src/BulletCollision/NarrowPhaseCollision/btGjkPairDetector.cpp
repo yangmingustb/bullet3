@@ -70,7 +70,10 @@ btGjkPairDetector::btGjkPairDetector(const btConvexShape *objectA, const btConve
 {
 }
 
-void btGjkPairDetector::getClosestPoints(const ClosestPointInput &input, Result &output, class btIDebugDraw *debugDraw, bool swapResults)
+void btGjkPairDetector::getClosestPoints(const ClosestPointInput &input, 
+										Result &output, 
+										class btIDebugDraw *debugDraw, 
+										bool swapResults)
 {
 	(void)swapResults;
 

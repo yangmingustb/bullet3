@@ -22,7 +22,8 @@ subject to the following restrictions:
 #include "BulletCollision/BroadphaseCollision/btBroadphaseProxy.h"  //for the shape types
 class btSerializer;
 
-///The btCollisionShape class provides an interface for collision shapes that can be shared among btCollisionObjects.
+///The btCollisionShape class provides an interface for collision 
+// shapes that can be shared among btCollisionObjects.
 ATTRIBUTE_ALIGNED16(class)
 btCollisionShape
 {

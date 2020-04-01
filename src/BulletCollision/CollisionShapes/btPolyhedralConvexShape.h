@@ -34,7 +34,8 @@ public:
 
 	virtual ~btPolyhedralConvexShape();
 
-	///optional method mainly used to generate multiple contact points by clipping polyhedral features (faces/edges)
+	///optional method mainly used to generate multiple contact points
+	//  by clipping polyhedral features (faces/edges)
 	///experimental/work-in-progress
 	virtual bool initializePolyhedralFeatures(int shiftVerticesByMargin = 0);
 
@@ -63,7 +64,8 @@ public:
 	virtual bool isInside(const btVector3& pt, btScalar tolerance) const = 0;
 };
 
-///The btPolyhedralConvexAabbCachingShape adds aabb caching to the btPolyhedralConvexShape
+///The btPolyhedralConvexAabbCachingShape adds aabb caching to the
+// btPolyhedralConvexShape
 class btPolyhedralConvexAabbCachingShape : public btPolyhedralConvexShape
 {
 	btVector3 m_localAabbMin;

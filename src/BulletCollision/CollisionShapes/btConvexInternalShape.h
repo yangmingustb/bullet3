@@ -30,6 +30,7 @@ btConvexInternalShape : public btConvexShape
 {
 protected:
 	//local scaling. collisionMargin is not scaled !
+	// 缩放因子
 	btVector3 m_localScaling;
 
 	btVector3 m_implicitShapeDimensions;
@@ -80,7 +81,8 @@ public:
 		setSafeMargin(minDimension, defaultMarginMultiplier);
 	}
 
-	///getAabb's default implementation is brute force, expected derived classes to implement a fast dedicated version
+	///getAabb's default implementation is brute force, expected derived classes to
+	// implement a fast dedicated version
 	void getAabb(const btTransform& t, btVector3& aabbMin, btVector3& aabbMax) const
 	{
 		getAabbSlow(t, aabbMin, aabbMax);

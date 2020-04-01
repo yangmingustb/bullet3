@@ -278,6 +278,7 @@ inline int btIsDoublePrecision()
 			#else//__APPLE__
 
 				#define SIMD_FORCE_INLINE inline
+				// 检查对齐方法
 				///@todo: check out alignment methods for other platforms/compilers
 				///#define ATTRIBUTE_ALIGNED16(a) a __attribute__ ((aligned (16)))
 				///#define ATTRIBUTE_ALIGNED64(a) a __attribute__ ((aligned (64)))

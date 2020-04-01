@@ -24,8 +24,11 @@ subject to the following restrictions:
 #include "LinearMath/btSerializer.h"
 #include "btConvexPolyhedron.h"
 #include "LinearMath/btConvexHullComputer.h"
+#include <iostream>
 
-btConvexHullShape ::btConvexHullShape(const btScalar* points, int numPoints, int stride) : btPolyhedralConvexAabbCachingShape()
+btConvexHullShape ::btConvexHullShape(const btScalar* points,
+									  int numPoints,
+									  int stride) : btPolyhedralConvexAabbCachingShape()
 {
 	m_shapeType = CONVEX_HULL_SHAPE_PROXYTYPE;
 	m_unscaledPoints.resize(numPoints);
@@ -44,6 +47,7 @@ btConvexHullShape ::btConvexHullShape(const btScalar* points, int numPoints, int
 
 void btConvexHullShape::setLocalScaling(const btVector3& scaling)
 {
+	std::cout << "enter setLocalScaling" << std::endl;
 	m_localScaling = scaling;
 	recalcLocalAabb();
 }

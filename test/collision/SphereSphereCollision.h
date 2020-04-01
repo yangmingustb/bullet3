@@ -30,7 +30,8 @@ struct btSphereSphereCollisionDescription
 ///compute the distance between two spheres, where the distance is zero when the spheres are touching
 ///positive distance means the spheres are separate and negative distance means penetration
 ///point A and pointB are witness points, and normalOnB points from sphere B to sphere A
-inline int btComputeSphereSphereCollision(const btSphereSphereCollisionDescription& input, btDistanceInfo* distInfo)
+inline int btComputeSphereSphereCollision(const btSphereSphereCollisionDescription& input, 
+										  btDistanceInfo* distInfo)
 {
 	btVector3 diff = input.m_sphereTransformA.getOrigin() - input.m_sphereTransformB.getOrigin();
 	btScalar len = diff.length();

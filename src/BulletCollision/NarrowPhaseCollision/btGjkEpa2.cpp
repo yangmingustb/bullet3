@@ -80,6 +80,7 @@ typedef unsigned char U1;
 struct MinkowskiDiff
 {
 	const btConvexShape* m_shapes[2];
+	// 这两个参数是做什么的？
 	btMatrix3x3 m_toshape1;
 	btTransform m_toshape0;
 #ifdef __SPU__
@@ -152,17 +153,19 @@ struct MinkowskiDiff
 typedef MinkowskiDiff tShape;
 
 // GJK
-struct GJK
-{
+struct GJK{
 	/* Types		*/
-	struct sSV
-	{
+	// 单纯形顶点
+	struct sSV{
+		// 方向和顶点
 		btVector3 d, w;
 	};
-	struct sSimplex
-	{
+	// 单纯形
+	struct sSimplex{
 		sSV* c[4];
+		// 权重
 		btScalar p[4];
+		// 顶点数量
 		U rank;
 	};
 	struct eStatus
@@ -176,30 +179,37 @@ struct GJK
 	};
 	/* Fields		*/
 	tShape m_shape;
+	// direction
 	btVector3 m_ray;
 	btScalar m_distance;
 	sSimplex m_simplices[2];
 	sSV m_store[4];
 	sSV* m_free[4];
+	// simplex中空闲顶点的数目
 	U m_nfree;
 	U m_current;
 	sSimplex* m_simplex;
 	eStatus::_ m_status;
 	/* Methods		*/
-	GJK()
-	{
+	GJK(){
 		Initialize();
 	}
-	void Initialize()
-	{
+	void Initialize(){
 		m_ray = btVector3(0, 0, 0);
 		m_nfree = 0;
 		m_status = eStatus::Failed;
 		m_current = 0;
 		m_distance = 0;
 	}
-	eStatus::_ Evaluate(const tShape& shapearg, const btVector3& guess)
-	{
+
+	/**
+	 * @brief 
+	 * 
+	 * @param shapearg 
+	 * @param guess 
+	 * @return eStatus::_ 
+	 */
+	eStatus::_ Evaluate(const tShape& shapearg, const btVector3& guess)	{
 		U iterations = 0;
 		btScalar sqdist = 0;
 		btScalar alpha = 0;
@@ -217,6 +227,7 @@ struct GJK
 		m_distance = 0;
 		/* Initialize simplex		*/
 		m_simplices[0].rank = 0;
+		// 输入的猜测方向
 		m_ray = guess;
 		const btScalar sqrl = m_ray.length2();
 		appendvertice(m_simplices[0], sqrl > 0 ? -m_ray : btVector3(1, 0, 0));
@@ -227,7 +238,7 @@ struct GJK
 			lastw[1] =
 				lastw[2] =
 					lastw[3] = m_ray;
-		/* Loop						*/
+		/* Loop	*/
 		do
 		{
 			const U next = 1 - m_current;
@@ -243,34 +254,35 @@ struct GJK
 			/* Append new vertice in -'v' direction	*/
 			appendvertice(cs, -m_ray);
 			const btVector3& w = cs.c[cs.rank - 1]->w;
+
+			// 
 			bool found = false;
-			for (U i = 0; i < 4; ++i)
-			{
-				if ((w - lastw[i]).length2() < GJK_DUPLICATED_EPS)
-				{
+			for (U i = 0; i < 4; ++i)			{
+				if ((w - lastw[i]).length2() < GJK_DUPLICATED_EPS)				{
 					found = true;
 					break;
 				}
 			}
-			if (found)
-			{ /* Return old simplex				*/
+			if (found){ /* Return old simplex				*/
 				removevertice(m_simplices[m_current]);
 				break;
 			}
-			else
-			{ /* Update lastw					*/
+			else{ /* Update lastw					*/
 				lastw[clastw = (clastw + 1) & 3] = w;
 			}
+			// 在一个方向上搜索的点没有过原点，说明没有碰撞
 			/* Check for termination				*/
 			const btScalar omega = btDot(m_ray, w) / rl;
 			alpha = btMax(omega, alpha);
-			if (((rl - alpha) - (GJK_ACCURACY * rl)) <= 0)
-			{ /* Return old simplex				*/
+			if (((rl - alpha) - (GJK_ACCURACY * rl)) <= 0){ 
+				/* Return old simplex				*/
 				removevertice(m_simplices[m_current]);
 				break;
 			}
 			/* Reduce simplex						*/
 			btScalar weights[4];
+			// mask是确定原点在单纯性的哪一个位置。1阶单纯性将空间分成三个区
+			// 2阶单纯性分为7个区，3阶15个区
 			U mask = 0;
 			switch (cs.rank)
 			{
@@ -293,28 +305,24 @@ struct GJK
 										   weights, mask);
 					break;
 			}
-			if (sqdist >= 0)
-			{ /* Valid	*/
+			if (sqdist >= 0){
+				/* Valid	*/
 				ns.rank = 0;
 				m_ray = btVector3(0, 0, 0);
 				m_current = next;
-				for (U i = 0, ni = cs.rank; i < ni; ++i)
-				{
-					if (mask & (1 << i))
-					{
+				for (U i = 0, ni = cs.rank; i < ni; ++i){
+					if (mask & (1 << i)){
 						ns.c[ns.rank] = cs.c[i];
 						ns.p[ns.rank++] = weights[i];
 						m_ray += cs.c[i]->w * weights[i];
 					}
-					else
-					{
+					else{
 						m_free[m_nfree++] = cs.c[i];
 					}
 				}
 				if (mask == 15) m_status = eStatus::Inside;
 			}
-			else
-			{ /* Return old simplex				*/
+			else{ /* Return old simplex				*/
 				removevertice(m_simplices[m_current]);
 				break;
 			}
@@ -335,6 +343,7 @@ struct GJK
 		}
 		return (m_status);
 	}
+
 	bool EncloseOrigin()
 	{
 		switch (m_simplex->rank)
@@ -410,43 +419,48 @@ struct GJK
 	{
 		m_free[m_nfree++] = simplex.c[--simplex.rank];
 	}
+	
 	void appendvertice(sSimplex& simplex, const btVector3& v)
 	{
 		simplex.p[simplex.rank] = 0;
 		simplex.c[simplex.rank] = m_free[--m_nfree];
 		getsupport(v, *simplex.c[simplex.rank++]);
 	}
-	static btScalar det(const btVector3& a, const btVector3& b, const btVector3& c)
+	static btScalar det(const btVector3& a, 
+						const btVector3& b, 
+						const btVector3& c)
 	{
 		return (a.y() * b.z() * c.x() + a.z() * b.x() * c.y() -
 				a.x() * b.z() * c.y() - a.y() * b.x() * c.z() +
 				a.x() * b.y() * c.z() - a.z() * b.y() * c.x());
 	}
+
 	static btScalar projectorigin(const btVector3& a,
 								  const btVector3& b,
 								  btScalar* w, U& m)
 	{
 		const btVector3 d = b - a;
 		const btScalar l = d.length2();
-		if (l > GJK_SIMPLEX2_EPS)
-		{
+		if (l > GJK_SIMPLEX2_EPS){
 			const btScalar t(l > 0 ? -btDot(a, d) / l : 0);
-			if (t >= 1)
-			{
+			// 投影点在b这一边
+			if (t >= 1){
 				w[0] = 0;
 				w[1] = 1;
 				m = 2;
 				return (b.length2());
 			}
-			else if (t <= 0)
-			{
+			// 投影点在a这一边
+			else if (t <= 0){
 				w[0] = 1;
 				w[1] = 0;
 				m = 1;
 				return (a.length2());
 			}
-			else
-			{
+			// 投影点在内部，w表示投影点在线段上的比例，可以利用这个比例，来计算投影点的坐标
+			// m记录，
+			// 返回的是搜索方向向量的长度平方
+			else{
 				w[0] = 1 - (w[1] = t);
 				m = 3;
 				return ((a + d * t).length2());
@@ -549,7 +563,7 @@ struct GJK
 		}
 		return (-1);
 	}
-};
+}; // gjk class
 
 // EPA
 struct EPA
@@ -898,15 +912,16 @@ struct EPA
 		}
 		return (false);
 	}
-};
+}; // epa class
 
 //
-static void Initialize(const btConvexShape* shape0, const btTransform& wtrs0,
-					   const btConvexShape* shape1, const btTransform& wtrs1,
+static void Initialize(const btConvexShape* shape0, 
+					   const btTransform& wtrs0,
+					   const btConvexShape* shape1, 
+					   const btTransform& wtrs1,
 					   btGjkEpaSolver2::sResults& results,
 					   tShape& shape,
-					   bool withmargins)
-{
+					   bool withmargins){
 	/* Results		*/
 	results.witnesses[0] =
 		results.witnesses[1] = btVector3(0, 0, 0);
@@ -914,6 +929,7 @@ static void Initialize(const btConvexShape* shape0, const btTransform& wtrs0,
 	/* Shape		*/
 	shape.m_shapes[0] = shape0;
 	shape.m_shapes[1] = shape1;
+	// 暂时不用管
 	shape.m_toshape1 = wtrs1.getBasis().transposeTimes(wtrs0.getBasis());
 	shape.m_toshape0 = wtrs0.inverseTimes(wtrs1);
 	shape.EnableMargin(withmargins);
@@ -933,7 +949,18 @@ int btGjkEpaSolver2::StackSizeRequirement()
 	return (sizeof(GJK) + sizeof(EPA));
 }
 
-//
+/**
+ * @brief 
+ * 
+ * @param shape0 
+ * @param wtrs0 
+ * @param shape1 
+ * @param wtrs1 
+ * @param guess 
+ * @param results 
+ * @return true 
+ * @return false 
+ */
 bool btGjkEpaSolver2::Distance(const btConvexShape* shape0,
 							   const btTransform& wtrs0,
 							   const btConvexShape* shape1,

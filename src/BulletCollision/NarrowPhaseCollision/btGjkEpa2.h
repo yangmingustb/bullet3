@@ -57,14 +57,17 @@ struct btGjkEpaSolver2
 							sResults& results,
 							bool usemargins = true);
 #ifndef __SPU__
+	// 计算点到凸包的距离
 	static btScalar SignedDistance(const btVector3& position,
 								   btScalar margin,
 								   const btConvexShape* shape,
 								   const btTransform& wtrs,
 								   sResults& results);
 
-	static bool SignedDistance(const btConvexShape* shape0, const btTransform& wtrs0,
-							   const btConvexShape* shape1, const btTransform& wtrs1,
+	static bool SignedDistance(const btConvexShape* shape0, 
+							   const btTransform& wtrs0,
+							   const btConvexShape* shape1, 
+							   const btTransform& wtrs1,
 							   const btVector3& guess,
 							   sResults& results);
 #endif  //__SPU__

@@ -423,7 +423,10 @@ btVector3 btPolyhedralConvexShape::localGetSupportingVertexWithoutMargin(const b
 	return supVec;
 }
 
-void btPolyhedralConvexShape::batchedUnitVectorGetSupportingVertexWithoutMargin(const btVector3* vectors, btVector3* supportVerticesOut, int numVectors) const
+void btPolyhedralConvexShape::
+	batchedUnitVectorGetSupportingVertexWithoutMargin(const btVector3* vectors,
+													  btVector3* supportVerticesOut,
+													  int numVectors) const
 {
 #ifndef __SPU__
 	int i;

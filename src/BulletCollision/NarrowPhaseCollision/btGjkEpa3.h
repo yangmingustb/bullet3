@@ -895,7 +895,8 @@ static void Initialize(const btConvexTemplate& a, const btConvexTemplate& b,
 
 //
 template <typename btConvexTemplate>
-bool btGjkEpaSolver3_Distance(const btConvexTemplate& a, const btConvexTemplate& b,
+bool btGjkEpaSolver3_Distance(const btConvexTemplate& a, 
+							  const btConvexTemplate& b,
 							  const btVector3& guess,
 							  btGjkEpaSolver3::sResults& results)
 {

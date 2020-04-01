@@ -26,7 +26,9 @@ void btConvexInternalShape::setLocalScaling(const btVector3& scaling)
 	m_localScaling = scaling.absolute();
 }
 
-void btConvexInternalShape::getAabbSlow(const btTransform& trans, btVector3& minAabb, btVector3& maxAabb) const
+void btConvexInternalShape::getAabbSlow(const btTransform& trans,
+										btVector3& minAabb,
+										btVector3& maxAabb) const
 {
 #ifndef __SPU__
 	//use localGetSupportingVertexWithoutMargin?

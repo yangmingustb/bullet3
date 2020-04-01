@@ -23,7 +23,9 @@ subject to the following restrictions:
 /// btDispatcher uses these types
 /// IMPORTANT NOTE:The types are ordered polyhedral, implicit convex and concave
 /// to facilitate type checking
-/// CUSTOM_POLYHEDRAL_SHAPE_TYPE,CUSTOM_CONVEX_SHAPE_TYPE and CUSTOM_CONCAVE_SHAPE_TYPE can be used to extend Bullet without modifying source code
+/// CUSTOM_POLYHEDRAL_SHAPE_TYPE,CUSTOM_CONVEX_SHAPE_TYPE
+// and CUSTOM_CONCAVE_SHAPE_TYPE can be used to extend Bullet
+// without modifying source code
 enum BroadphaseNativeTypes
 {
 	// polyhedral convex shapes
@@ -80,7 +82,8 @@ enum BroadphaseNativeTypes
 };
 
 ///The btBroadphaseProxy is the main class that can be used with the Bullet broadphases.
-///It stores collision shape type information, collision filter information and a client object, typically a btCollisionObject or btRigidBody.
+///It stores collision shape type information, collision filter
+// information and a client object, typically a btCollisionObject or btRigidBody.
 ATTRIBUTE_ALIGNED16(struct)
 btBroadphaseProxy
 {

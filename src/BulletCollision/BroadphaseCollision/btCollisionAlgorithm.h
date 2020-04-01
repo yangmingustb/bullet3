@@ -48,7 +48,8 @@ struct btCollisionAlgorithmConstructionInfo
 	//	int	getDispatcherId();
 };
 
-///btCollisionAlgorithm is an collision interface that is compatible with the Broadphase and btDispatcher.
+///btCollisionAlgorithm is an collision interface that is
+// compatible with the Broadphase and btDispatcher.
 ///It is persistent over frames
 class btCollisionAlgorithm
 {

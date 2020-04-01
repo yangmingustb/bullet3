@@ -30,3 +30,7 @@ CTestTestFile.cmake
 *.vcxproj
 *.vcxproj.filters
 *.sln
+
+*.null
+*.out
+*build/

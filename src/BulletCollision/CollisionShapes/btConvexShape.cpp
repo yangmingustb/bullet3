@@ -67,7 +67,19 @@ void btConvexShape::project(const btTransform& trans, const btVector3& dir, btSc
 	}
 }
 
-static btVector3 convexHullSupport(const btVector3& localDirOrg, const btVector3* points, int numPoints, const btVector3& localScaling)
+/**
+ * @brief 
+ * 
+ * @param localDirOrg 
+ * @param points 
+ * @param numPoints 
+ * @param localScaling 缩放因子
+ * @return btVector3 
+ */
+static btVector3 convexHullSupport(const btVector3& localDirOrg, 
+								   const btVector3* points, 
+								   int numPoints, 
+								   const btVector3& localScaling)
 {
 	btVector3 vec = localDirOrg * localScaling;
 
@@ -117,6 +129,7 @@ static btVector3 convexHullSupport(const btVector3& localDirOrg, const btVector3
 #else
 
 	btScalar maxDot;
+	// 返回最远点索引
 	long ptIndex = vec.maxDot(points, numPoints, maxDot);
 	btAssert(ptIndex >= 0);
 	if (ptIndex < 0)
@@ -284,6 +297,7 @@ btVector3 btConvexShape::localGetSupportVertexWithoutMarginNonVirtual(const btVe
 			int numPoints = convexPointCloudShape->getNumPoints();
 			return convexHullSupport(localDir, points, numPoints, convexPointCloudShape->getLocalScalingNV());
 		}
+		// convex hull support point
 		case CONVEX_HULL_SHAPE_PROXYTYPE:
 		{
 			btConvexHullShape* convexHullShape = (btConvexHullShape*)this;

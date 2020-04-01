@@ -58,7 +58,11 @@ bool btGjkEpaCalcPenDepth(const btConvexTemplate& a, const btConvexTemplate& b,
 }
 
 template <typename btConvexTemplate, typename btGjkDistanceTemplate>
-int btComputeGjkEpaPenetration(const btConvexTemplate& a, const btConvexTemplate& b, const btGjkCollisionDescription& colDesc, btVoronoiSimplexSolver& simplexSolver, btGjkDistanceTemplate* distInfo)
+int btComputeGjkEpaPenetration(const btConvexTemplate& a, 
+							   const btConvexTemplate& b, 
+							   const btGjkCollisionDescription& colDesc, 
+							   btVoronoiSimplexSolver& simplexSolver, 
+							   btGjkDistanceTemplate* distInfo)
 {
 	bool m_catchDegeneracies = true;
 	btScalar m_cachedSeparatingDistance = 0.f;

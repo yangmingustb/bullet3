@@ -36,7 +36,8 @@ struct btSimpleBroadphaseProxy : public btBroadphaseProxy
 	SIMD_FORCE_INLINE int GetNextFree() const { return m_nextFree; }
 };
 
-///The SimpleBroadphase is just a unit-test for btAxisSweep3, bt32BitAxisSweep3, or btDbvtBroadphase, so use those classes instead.
+///The SimpleBroadphase is just a unit-test for btAxisSweep3,
+// bt32BitAxisSweep3, or btDbvtBroadphase, so use those classes instead.
 ///It is a brute force aabb culling broadphase based on O(n^2) aabb checks
 class btSimpleBroadphase : public btBroadphaseInterface
 {
