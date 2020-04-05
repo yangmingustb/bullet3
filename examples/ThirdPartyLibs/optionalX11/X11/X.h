@@ -32,13 +32,13 @@ Copyright 1987 by Digital Equipment Corporation, Maynard, Massachusetts.
 
                         All Rights Reserved
 
-Permission to use, copy, modify, and distribute this software and its 
-documentation for any purpose and without fee is hereby granted, 
+Permission to use, copy, modify, and distribute this software and its
+documentation for any purpose and without fee is hereby granted,
 provided that the above copyright notice appear in all copies and that
-both that copyright notice and this permission notice appear in 
+both that copyright notice and this permission notice appear in
 supporting documentation, and that the name of Digital not be
 used in advertising or publicity pertaining to distribution of the
-software without specific, written prior permission.  
+software without specific, written prior permission.
 
 DIGITAL DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING
 ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL
@@ -115,13 +115,15 @@ typedef unsigned char KeyCode;
 #define None 0L /* universal null resource or null atom */
 #endif
 
-#define ParentRelative 1L /* background pixmap in CreateWindow
-				    and ChangeWindowAttributes */
+#define ParentRelative                    \
+  1L /* background pixmap in CreateWindow \
+               and ChangeWindowAttributes */
 
-#define CopyFromParent 0L /* border pixmap in CreateWindow
-				       and ChangeWindowAttributes
-				   special VisualID and special window
-				       class passed to CreateWindow */
+#define CopyFromParent                            \
+  0L /* border pixmap in CreateWindow             \
+                  and ChangeWindowAttributes      \
+              special VisualID and special window \
+                  class passed to CreateWindow */
 
 #define PointerWindow 0L /* destination window in SendEvent */
 #define InputFocus 1L    /* destination window in SendEvent */
@@ -140,8 +142,8 @@ typedef unsigned char KeyCode;
 
 #define NoSymbol 0L /* special KeySym */
 
-/***************************************************************** 
- * EVENT DEFINITIONS 
+/*****************************************************************
+ * EVENT DEFINITIONS
  *****************************************************************/
 
 /* Input Event Masks. Used as event-mask window attribute and as arguments
@@ -214,7 +216,8 @@ are reserved in the protocol for errors and replies. */
 #define GenericEvent 35
 #define LASTEvent 36 /* must be bigger than any event # */
 
-/* Key masks. Used as modifiers to GrabButton and GrabKey, results of QueryPointer,
+/* Key masks. Used as modifiers to GrabButton and GrabKey, results of
+   QueryPointer,
    state in various key-, mouse-, and button-related events. */
 
 #define ShiftMask (1 << 0)
@@ -341,28 +344,29 @@ are reserved in the protocol for errors and replies. */
 #define RevertToParent 2
 
 /*****************************************************************
- * ERROR CODES 
+ * ERROR CODES
  *****************************************************************/
 
-#define Success 0            /* everything's okay */
-#define BadRequest 1         /* bad request code */
-#define BadValue 2           /* int parameter out of range */
-#define BadWindow 3          /* parameter not a Window */
-#define BadPixmap 4          /* parameter not a Pixmap */
-#define BadAtom 5            /* parameter not an Atom */
-#define BadCursor 6          /* parameter not a Cursor */
-#define BadFont 7            /* parameter not a Font */
-#define BadMatch 8           /* parameter mismatch */
-#define BadDrawable 9        /* parameter not a Pixmap or Window */
-#define BadAccess 10         /* depending on context:
-				 - key/button already grabbed
-				 - attempt to free an illegal 
-				   cmap entry 
-				- attempt to store into a read-only 
-				   color map entry.
- 				- attempt to modify the access control
-				   list from other than the local host.
-				*/
+#define Success 0     /* everything's okay */
+#define BadRequest 1  /* bad request code */
+#define BadValue 2    /* int parameter out of range */
+#define BadWindow 3   /* parameter not a Window */
+#define BadPixmap 4   /* parameter not a Pixmap */
+#define BadAtom 5     /* parameter not an Atom */
+#define BadCursor 6   /* parameter not a Cursor */
+#define BadFont 7     /* parameter not a Font */
+#define BadMatch 8    /* parameter mismatch */
+#define BadDrawable 9 /* parameter not a Pixmap or Window */
+#define BadAccess                                                       \
+  10                         /* depending on context:                   \
+                                 - key/button already grabbed           \
+                                 - attempt to free an illegal           \
+                                   cmap entry                           \
+                                - attempt to store into a read-only     \
+                                   color map entry.                     \
+                                - attempt to modify the access control  \
+                                   list from other than the local host. \
+                                */
 #define BadAlloc 11          /* insufficient resources */
 #define BadColor 12          /* no such colormap */
 #define BadGC 13             /* parameter not a GC */
@@ -375,7 +379,7 @@ are reserved in the protocol for errors and replies. */
 #define LastExtensionError 255
 
 /*****************************************************************
- * WINDOW DEFINITIONS 
+ * WINDOW DEFINITIONS
  *****************************************************************/
 
 /* Window classes used by CreateWindow */
@@ -583,7 +587,7 @@ are reserved in the protocol for errors and replies. */
 
 #define GCLastBit 22
 /*****************************************************************
- * FONTS 
+ * FONTS
  *****************************************************************/
 
 /* used in QueryFont -- draw direction */
@@ -594,7 +598,7 @@ are reserved in the protocol for errors and replies. */
 #define FontChange 255
 
 /*****************************************************************
- *  IMAGING 
+ *  IMAGING
  *****************************************************************/
 
 /* ImageFormat -- PutImage, GetImage */
@@ -604,7 +608,7 @@ are reserved in the protocol for errors and replies. */
 #define ZPixmap 2  /* depth == drawable depth */
 
 /*****************************************************************
- *  COLOR MAP STUFF 
+ *  COLOR MAP STUFF
  *****************************************************************/
 
 /* For CreateColormap */
@@ -628,7 +632,7 @@ are reserved in the protocol for errors and replies. */
 #define TileShape 1    /* size tiled fastest */
 #define StippleShape 2 /* size stippled fastest */
 
-/***************************************************************** 
+/*****************************************************************
  * KEYBOARD/POINTER STUFF
  *****************************************************************/
 
@@ -659,7 +663,7 @@ are reserved in the protocol for errors and replies. */
 #define MappingPointer 2
 
 /*****************************************************************
- * SCREEN SAVER STUFF 
+ * SCREEN SAVER STUFF
  *****************************************************************/
 
 #define DontPreferBlanking 0
@@ -692,7 +696,7 @@ are reserved in the protocol for errors and replies. */
 #define EnableAccess 1
 #define DisableAccess 0
 
-/* Display classes  used in opening the connection 
+/* Display classes  used in opening the connection
  * Note that the statically allocated ones are even numbered and the
  * dynamically changeable ones are odd numbered */
 

@@ -1,4 +1,5 @@
-/* Copyright (C) 2006-2009 Charlie C & Erwin Coumans http://gamekit.googlecode.com
+/* Copyright (C) 2006-2009 Charlie C & Erwin Coumans
+* http://gamekit.googlecode.com
 *
 * This software is provided 'as-is', without any express or implied
 * warranty.  In no event will the authors be held liable for any damages
@@ -23,14 +24,18 @@
 #define B3_SIZEOFBLENDERHEADER 12
 
 // ------------------------------------------------------------
-#if defined(__sgi) || defined(__sparc) || defined(__sparc__) || defined(__PPC__) || defined(__ppc__) || defined(__BIG_ENDIAN__)
-#define B3_MAKE_ID(a, b, c, d) ((int)(a) << 24 | (int)(b) << 16 | (c) << 8 | (d))
+#if defined(__sgi) || defined(__sparc) || defined(__sparc__) || \
+    defined(__PPC__) || defined(__ppc__) || defined(__BIG_ENDIAN__)
+#define B3_MAKE_ID(a, b, c, d) \
+  ((int)(a) << 24 | (int)(b) << 16 | (c) << 8 | (d))
 #else
-#define B3_MAKE_ID(a, b, c, d) ((int)(d) << 24 | (int)(c) << 16 | (b) << 8 | (a))
+#define B3_MAKE_ID(a, b, c, d) \
+  ((int)(d) << 24 | (int)(c) << 16 | (b) << 8 | (a))
 #endif
 
 // ------------------------------------------------------------
-#if defined(__sgi) || defined(__sparc) || defined(__sparc__) || defined(__PPC__) || defined(__ppc__) || defined(__BIG_ENDIAN__)
+#if defined(__sgi) || defined(__sparc) || defined(__sparc__) || \
+    defined(__PPC__) || defined(__ppc__) || defined(__BIG_ENDIAN__)
 #define B3_MAKE_ID2(c, d) ((c) << 8 | (d))
 #else
 #define B3_MAKE_ID2(c, d) ((d) << 8 | (c))
@@ -105,45 +110,45 @@
 #define B3_STRC B3_MAKE_ID('S', 'T', 'R', 'C')
 
 // ------------------------------------------------------------
-#define B3_SWITCH_INT(a)    \
-	{                       \
-		char s_i, *p_i;     \
-		p_i = (char *)&(a); \
-		s_i = p_i[0];       \
-		p_i[0] = p_i[3];    \
-		p_i[3] = s_i;       \
-		s_i = p_i[1];       \
-		p_i[1] = p_i[2];    \
-		p_i[2] = s_i;       \
-	}
+#define B3_SWITCH_INT(a) \
+  {                      \
+    char s_i, *p_i;      \
+    p_i = (char *)&(a);  \
+    s_i = p_i[0];        \
+    p_i[0] = p_i[3];     \
+    p_i[3] = s_i;        \
+    s_i = p_i[1];        \
+    p_i[1] = p_i[2];     \
+    p_i[2] = s_i;        \
+  }
 
 // ------------------------------------------------------------
-#define B3_SWITCH_SHORT(a)  \
-	{                       \
-		char s_i, *p_i;     \
-		p_i = (char *)&(a); \
-		s_i = p_i[0];       \
-		p_i[0] = p_i[1];    \
-		p_i[1] = s_i;       \
-	}
+#define B3_SWITCH_SHORT(a) \
+  {                        \
+    char s_i, *p_i;        \
+    p_i = (char *)&(a);    \
+    s_i = p_i[0];          \
+    p_i[0] = p_i[1];       \
+    p_i[1] = s_i;          \
+  }
 
 // ------------------------------------------------------------
 #define B3_SWITCH_LONGINT(a) \
-	{                        \
-		char s_i, *p_i;      \
-		p_i = (char *)&(a);  \
-		s_i = p_i[0];        \
-		p_i[0] = p_i[7];     \
-		p_i[7] = s_i;        \
-		s_i = p_i[1];        \
-		p_i[1] = p_i[6];     \
-		p_i[6] = s_i;        \
-		s_i = p_i[2];        \
-		p_i[2] = p_i[5];     \
-		p_i[5] = s_i;        \
-		s_i = p_i[3];        \
-		p_i[3] = p_i[4];     \
-		p_i[4] = s_i;        \
-	}
+  {                          \
+    char s_i, *p_i;          \
+    p_i = (char *)&(a);      \
+    s_i = p_i[0];            \
+    p_i[0] = p_i[7];         \
+    p_i[7] = s_i;            \
+    s_i = p_i[1];            \
+    p_i[1] = p_i[6];         \
+    p_i[6] = s_i;            \
+    s_i = p_i[2];            \
+    p_i[2] = p_i[5];         \
+    p_i[5] = s_i;            \
+    s_i = p_i[3];            \
+    p_i[3] = p_i[4];         \
+    p_i[4] = s_i;            \
+  }
 
 #endif  //__B_DEFINES_H__

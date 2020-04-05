@@ -47,261 +47,223 @@
 #include <stdio.h>
 
 template <class Type>
-class Array
-{
-public:
-	Array(int s = 0);
-	Array(Array<Type> &array);
-	~Array();
-	void allocate(int s);
-	void SetSize(int s);
-	void Pack();
-	Type &Add(Type);
-	void AddUnique(Type);
-	int Contains(Type);
-	void Insert(Type, int);
-	int IndexOf(Type);
-	void Remove(Type);
-	void DelIndex(int i);
-	Type &DelIndexWithLast(int i);
-	Type *element;
-	int count;
-	int array_size;
-	const Type &operator[](int i) const
-	{
-		assert(i >= 0 && i < count);
-		return element[i];
-	}
-	Type &operator[](int i)
-	{
-		assert(i >= 0 && i < count);
-		return element[i];
-	}
-	Type &Pop()
-	{
-		assert(count);
-		count--;
-		return element[count];
-	}
-	Array<Type> &copy(const Array<Type> &array);
-	Array<Type> &operator=(Array<Type> &array);
+class Array {
+ public:
+  Array(int s = 0);
+  Array(Array<Type> &array);
+  ~Array();
+  void allocate(int s);
+  void SetSize(int s);
+  void Pack();
+  Type &Add(Type);
+  void AddUnique(Type);
+  int Contains(Type);
+  void Insert(Type, int);
+  int IndexOf(Type);
+  void Remove(Type);
+  void DelIndex(int i);
+  Type &DelIndexWithLast(int i);
+  Type *element;
+  int count;
+  int array_size;
+  const Type &operator[](int i) const {
+    assert(i >= 0 && i < count);
+    return element[i];
+  }
+  Type &operator[](int i) {
+    assert(i >= 0 && i < count);
+    return element[i];
+  }
+  Type &Pop() {
+    assert(count);
+    count--;
+    return element[count];
+  }
+  Array<Type> &copy(const Array<Type> &array);
+  Array<Type> &operator=(Array<Type> &array);
 };
 
 template <class Type>
-Array<Type>::Array(int s)
-{
-	if (s == -1) return;
-	count = 0;
-	array_size = 0;
-	element = NULL;
-	if (s)
-	{
-		allocate(s);
-	}
+Array<Type>::Array(int s) {
+  if (s == -1) return;
+  count = 0;
+  array_size = 0;
+  element = NULL;
+  if (s) {
+    allocate(s);
+  }
 }
 
 template <class Type>
-Array<Type>::Array(Array<Type> &array)
-{
-	count = 0;
-	array_size = 0;
-	element = NULL;
-	*this = array;
+Array<Type>::Array(Array<Type> &array) {
+  count = 0;
+  array_size = 0;
+  element = NULL;
+  *this = array;
 }
 
 template <class Type>
-Array<Type> &Array<Type>::copy(const Array<Type> &array)
-{
-	assert(array.array_size >= 0);
-	count = 0;
-	for (int i = 0; i < array.count; i++)
-	{
-		Add(array[i]);
-	}
-	return *this;
+Array<Type> &Array<Type>::copy(const Array<Type> &array) {
+  assert(array.array_size >= 0);
+  count = 0;
+  for (int i = 0; i < array.count; i++) {
+    Add(array[i]);
+  }
+  return *this;
 }
 template <class Type>
-Array<Type> &Array<Type>::operator=(Array<Type> &array)
-{
-	if (array.array_size < 0)  //  negative number means steal the data buffer instead of copying
-	{
-		delete[] element;
-		element = array.element;
-		array_size = -array.array_size;
-		count = array.count;
-		array.count = array.array_size = 0;
-		array.element = NULL;
-		return *this;
-	}
-	count = 0;
-	for (int i = 0; i < array.count; i++)
-	{
-		Add(array[i]);
-	}
-	return *this;
+Array<Type> &Array<Type>::operator=(Array<Type> &array) {
+  if (array.array_size <
+      0)  //  negative number means steal the data buffer instead of copying
+  {
+    delete[] element;
+    element = array.element;
+    array_size = -array.array_size;
+    count = array.count;
+    array.count = array.array_size = 0;
+    array.element = NULL;
+    return *this;
+  }
+  count = 0;
+  for (int i = 0; i < array.count; i++) {
+    Add(array[i]);
+  }
+  return *this;
 }
 
 template <class Type>
-Array<Type>::~Array()
-{
-	if (element != NULL && array_size != 0)
-	{
-		delete[] element;
-	}
-	count = 0;
-	array_size = 0;
-	element = NULL;
+Array<Type>::~Array() {
+  if (element != NULL && array_size != 0) {
+    delete[] element;
+  }
+  count = 0;
+  array_size = 0;
+  element = NULL;
 }
 
 template <class Type>
-void Array<Type>::allocate(int s)
-{
-	assert(s > 0);
-	assert(s >= count);
-	if (s == array_size) return;
-	Type *old = element;
-	array_size = s;
-	element = new Type[array_size];
-	assert(element);
-	for (int i = 0; i < count; i++)
-	{
-		element[i] = old[i];
-	}
-	if (old) delete[] old;
+void Array<Type>::allocate(int s) {
+  assert(s > 0);
+  assert(s >= count);
+  if (s == array_size) return;
+  Type *old = element;
+  array_size = s;
+  element = new Type[array_size];
+  assert(element);
+  for (int i = 0; i < count; i++) {
+    element[i] = old[i];
+  }
+  if (old) delete[] old;
 }
 
 template <class Type>
-void Array<Type>::SetSize(int s)
-{
-	if (s == 0)
-	{
-		if (element)
-		{
-			delete[] element;
-			element = NULL;
-		}
-		array_size = s;
-	}
-	else
-	{
-		allocate(s);
-	}
-	count = s;
+void Array<Type>::SetSize(int s) {
+  if (s == 0) {
+    if (element) {
+      delete[] element;
+      element = NULL;
+    }
+    array_size = s;
+  } else {
+    allocate(s);
+  }
+  count = s;
 }
 
 template <class Type>
-void Array<Type>::Pack()
-{
-	allocate(count);
+void Array<Type>::Pack() {
+  allocate(count);
 }
 
 template <class Type>
-Type &Array<Type>::Add(Type t)
-{
-	assert(count <= array_size);
-	if (count == array_size)
-	{
-		allocate((array_size) ? array_size * 2 : 16);
-	}
-	//int i;
-	//for(i=0;i<count;i++) {
-	// dissallow duplicates
-	//	assert(element[i] != t);
-	//}
-	element[count++] = t;
-	return element[count - 1];
+Type &Array<Type>::Add(Type t) {
+  assert(count <= array_size);
+  if (count == array_size) {
+    allocate((array_size) ? array_size * 2 : 16);
+  }
+  // int i;
+  // for(i=0;i<count;i++) {
+  // dissallow duplicates
+  //	assert(element[i] != t);
+  //}
+  element[count++] = t;
+  return element[count - 1];
 }
 
 template <class Type>
-int Array<Type>::Contains(Type t)
-{
-	int i;
-	int found = 0;
-	for (i = 0; i < count; i++)
-	{
-		if (element[i] == t) found++;
-	}
-	return found;
+int Array<Type>::Contains(Type t) {
+  int i;
+  int found = 0;
+  for (i = 0; i < count; i++) {
+    if (element[i] == t) found++;
+  }
+  return found;
 }
 
 template <class Type>
-void Array<Type>::AddUnique(Type t)
-{
-	if (!Contains(t)) Add(t);
+void Array<Type>::AddUnique(Type t) {
+  if (!Contains(t)) Add(t);
 }
 
 template <class Type>
-void Array<Type>::DelIndex(int i)
-{
-	assert(i < count);
-	count--;
-	while (i < count)
-	{
-		element[i] = element[i + 1];
-		i++;
-	}
+void Array<Type>::DelIndex(int i) {
+  assert(i < count);
+  count--;
+  while (i < count) {
+    element[i] = element[i + 1];
+    i++;
+  }
 }
 
 template <class Type>
-Type &Array<Type>::DelIndexWithLast(int i)
-{
-	assert(i < count);
-	count--;
-	if (i < count)
-	{
-		Type r = element[i];
-		element[i] = element[count];
-		element[count] = r;
-	}
-	return element[count];
+Type &Array<Type>::DelIndexWithLast(int i) {
+  assert(i < count);
+  count--;
+  if (i < count) {
+    Type r = element[i];
+    element[i] = element[count];
+    element[count] = r;
+  }
+  return element[count];
 }
 
 template <class Type>
-void Array<Type>::Remove(Type t)
-{
-	int i;
-	for (i = 0; i < count; i++)
-	{
-		if (element[i] == t)
-		{
-			break;
-		}
-	}
-	assert(i < count);  // assert object t is in the array.
-	DelIndex(i);
-	for (i = 0; i < count; i++)
-	{
-		assert(element[i] != t);
-	}
+void Array<Type>::Remove(Type t) {
+  int i;
+  for (i = 0; i < count; i++) {
+    if (element[i] == t) {
+      break;
+    }
+  }
+  assert(i < count);  // assert object t is in the array.
+  DelIndex(i);
+  for (i = 0; i < count; i++) {
+    assert(element[i] != t);
+  }
 }
 
 template <class Type>
-void Array<Type>::Insert(Type t, int k)
-{
-	int i = count;
-	Add(t);  // to allocate space
-	while (i > k)
-	{
-		element[i] = element[i - 1];
-		i--;
-	}
-	assert(i == k);
-	element[k] = t;
+void Array<Type>::Insert(Type t, int k) {
+  int i = count;
+  Add(t);  // to allocate space
+  while (i > k) {
+    element[i] = element[i - 1];
+    i--;
+  }
+  assert(i == k);
+  element[k] = t;
 }
 
 template <class Type>
-int Array<Type>::IndexOf(Type t)
-{
-	int i;
-	for (i = 0; i < count; i++)
-	{
-		if (element[i] == t)
-		{
-			return i;
-		}
-	}
-	assert(0);
-	return -1;
+int Array<Type>::IndexOf(Type t) {
+  int i;
+  for (i = 0; i < count; i++) {
+    if (element[i] == t) {
+      return i;
+    }
+  }
+  assert(0);
+  return -1;
 }
 
 #endif

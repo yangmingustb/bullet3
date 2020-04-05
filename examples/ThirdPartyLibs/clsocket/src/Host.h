@@ -47,8 +47,7 @@
 #include <limits.h>
 
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif
 
 /*---------------------------------------------------------------------------*/
@@ -62,37 +61,36 @@ extern "C"
 #endif
 
 #if defined(_LINUX) || defined(_DARWIN) || defined(_BSD)
-	typedef unsigned char uint8;
-	typedef char int8;
-	typedef unsigned short uint16;
-	typedef short int16;
-	typedef unsigned int uint32;
-	typedef int int32;
-	typedef int SOCKET;
+typedef unsigned char uint8;
+typedef char int8;
+typedef unsigned short uint16;
+typedef short int16;
+typedef unsigned int uint32;
+typedef int int32;
+typedef int SOCKET;
 #endif
 
 #ifdef WIN32
-	struct iovec
-	{
-		void *iov_base;
-		size_t iov_len;
-	};
+struct iovec {
+  void *iov_base;
+  size_t iov_len;
+};
 
-	typedef unsigned char uint8;
-	typedef char int8;
-	typedef unsigned short uint16;
-	typedef short int16;
-	typedef unsigned int uint32;
-	typedef int int32;
+typedef unsigned char uint8;
+typedef char int8;
+typedef unsigned short uint16;
+typedef short int16;
+typedef unsigned int uint32;
+typedef int int32;
 #endif
 
 #ifdef WIN32
-	typedef int socklen_t;
+typedef int socklen_t;
 #endif
 
 #if defined(WIN32)
-	typedef unsigned long long int uint64;
-	typedef long long int int64;
+typedef unsigned long long int uint64;
+typedef long long int int64;
 #elif (__WORDSIZE == 32)
 __extension__ typedef long long int int64;
 __extension__ typedef unsigned long long int uint64;
@@ -158,7 +156,8 @@ typedef long int int64;
 #define CLOSE(a) closesocket(a)
 #define READ(a, b, c) read(a, b, c)
 #define RECV(a, b, c, d) recv(a, (char *)b, c, d)
-#define RECVFROM(a, b, c, d, e, f) recvfrom(a, (char *)b, c, d, (sockaddr *)e, (int *)f)
+#define RECVFROM(a, b, c, d, e, f) \
+  recvfrom(a, (char *)b, c, d, (sockaddr *)e, (int *)f)
 #define RECV_FLAGS MSG_WAITALL
 #define SELECT(a, b, c, d, e) select((int32)a, b, c, d, e)
 #define SEND(a, b, c, d) send(a, (const char *)b, (int)c, d)
@@ -181,7 +180,8 @@ typedef long int int64;
 #define CLOSE(a) close(a)
 #define READ(a, b, c) read(a, b, c)
 #define RECV(a, b, c, d) recv(a, (void *)b, c, d)
-#define RECVFROM(a, b, c, d, e, f) recvfrom(a, (char *)b, c, d, (sockaddr *)e, f)
+#define RECVFROM(a, b, c, d, e, f) \
+  recvfrom(a, (char *)b, c, d, (sockaddr *)e, f)
 #define RECV_FLAGS MSG_WAITALL
 #define SELECT(a, b, c, d, e) select(a, b, c, d, e)
 #define SEND(a, b, c, d) send(a, (const int8 *)b, c, d)
@@ -193,8 +193,10 @@ typedef long int int64;
 #define SOCKET_ERROR_TIMEDOUT EAGAIN
 #define WRITE(a, b, c) write(a, b, c)
 #define WRITEV(a, b, c) writev(a, b, c)
-#define GETSOCKOPT(a, b, c, d, e) getsockopt((int)a, (int)b, (int)c, (void *)d, (socklen_t *)e)
-#define SETSOCKOPT(a, b, c, d, e) setsockopt((int)a, (int)b, (int)c, (const void *)d, (int)e)
+#define GETSOCKOPT(a, b, c, d, e) \
+  getsockopt((int)a, (int)b, (int)c, (void *)d, (socklen_t *)e)
+#define SETSOCKOPT(a, b, c, d, e) \
+  setsockopt((int)a, (int)b, (int)c, (const void *)d, (int)e)
 #define GETHOSTBYNAME(a) gethostbyname(a)
 #endif
 
@@ -213,9 +215,9 @@ typedef long int int64;
 #define FFLUSH(x) fflush(x)
 #define FILENO(s) fileno(s)
 #define FOPEN(x, y) fopen(x, y)
-	//#define FREAD(a,b,c,d)      fread(a, b, c, d)
+//#define FREAD(a,b,c,d)      fread(a, b, c, d)
 #define FSTAT(s, st) fstat(FILENO(s), st)
-	//#define FWRITE(a,b,c,d)     fwrite(a, b, c, d)
+//#define FWRITE(a,b,c,d)     fwrite(a, b, c, d)
 #define STAT_BLK_SIZE(x) ((x).st_blksize)
 
 /*---------------------------------------------------------------------------*/

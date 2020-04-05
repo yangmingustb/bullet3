@@ -9,11 +9,10 @@
 #define BulletTest_Test_v3skew_h
 
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif
 
-	int Test_v3skew(void);
+int Test_v3skew(void);
 
 #ifdef __cplusplus
 }

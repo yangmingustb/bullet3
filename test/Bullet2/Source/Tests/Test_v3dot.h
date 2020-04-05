@@ -9,11 +9,10 @@
 #define BulletTest_Test_v3dot_h
 
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif
 
-	int Test_v3dot(void);
+int Test_v3dot(void);
 
 #ifdef __cplusplus
 }

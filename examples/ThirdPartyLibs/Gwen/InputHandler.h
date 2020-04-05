@@ -1,7 +1,7 @@
 /*
-	GWEN
-	Copyright (c) 2010 Facepunch Studios
-	See license in Gwen.h
+        GWEN
+        Copyright (c) 2010 Facepunch Studios
+        See license in Gwen.h
 */
 
 #pragma once
@@ -11,15 +11,12 @@
 #include <queue>
 #include "Gwen/Gwen.h"
 
-namespace Gwen
-{
-namespace Controls
-{
+namespace Gwen {
+namespace Controls {
 class Base;
 }
 
-namespace Key
-{
+namespace Key {
 const unsigned char Invalid = 0;
 const unsigned char Return = 1;
 const unsigned char Backspace = 2;
@@ -40,19 +37,9 @@ const unsigned char Alt = 15;
 const unsigned char Count = 16;
 }  // namespace Key
 
-namespace Input
-{
-namespace Message
-{
-enum
-{
-	Copy,
-	Paste,
-	Cut,
-	Undo,
-	Redo,
-	SelectAll
-};
+namespace Input {
+namespace Message {
+enum { Copy, Paste, Cut, Undo, Redo, SelectAll };
 };
 
 // For use in panels
@@ -66,11 +53,14 @@ inline bool IsControlDown() { return IsKeyDown(Gwen::Key::Control); }
 
 // Does copy, paste etc
 bool GWEN_EXPORT DoSpecialKeys(Controls::Base* pCanvas, Gwen::UnicodeChar chr);
-bool GWEN_EXPORT HandleAccelerator(Controls::Base* pCanvas, Gwen::UnicodeChar chr);
+bool GWEN_EXPORT HandleAccelerator(Controls::Base* pCanvas,
+                                   Gwen::UnicodeChar chr);
 
 // Send input to canvas for study
-void GWEN_EXPORT OnMouseMoved(Controls::Base* pCanvas, int x, int y, int deltaX, int deltaY);
-bool GWEN_EXPORT OnMouseClicked(Controls::Base* pCanvas, int iButton, bool bDown);
+void GWEN_EXPORT OnMouseMoved(Controls::Base* pCanvas, int x, int y, int deltaX,
+                              int deltaY);
+bool GWEN_EXPORT OnMouseClicked(Controls::Base* pCanvas, int iButton,
+                                bool bDown);
 bool GWEN_EXPORT OnKeyEvent(Controls::Base* pCanvas, int iKey, bool bDown);
 void GWEN_EXPORT OnCanvasThink(Controls::Base* pControl);
 

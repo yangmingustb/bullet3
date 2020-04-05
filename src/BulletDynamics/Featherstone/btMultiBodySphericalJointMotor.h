@@ -3,17 +3,22 @@ Bullet Continuous Collision Detection and Physics Library
 Copyright (c) 2018 Erwin Coumans  http://bulletphysics.org
 
 This software is provided 'as-is', without any express or implied warranty.
-In no event will the authors be held liable for any damages arising from the use of this software.
+In no event will the authors be held liable for any damages arising from the use
+of this software.
 Permission is granted to anyone to use this software for any purpose,
 including commercial applications, and to alter it and redistribute it freely,
 subject to the following restrictions:
 
-1. The origin of this software must not be misrepresented; you must not claim that you wrote the original software. If you use this software in a product, an acknowledgment in the product documentation would be appreciated but is not required.
-2. Altered source versions must be plainly marked as such, and must not be misrepresented as being the original software.
+1. The origin of this software must not be misrepresented; you must not claim
+that you wrote the original software. If you use this software in a product, an
+acknowledgment in the product documentation would be appreciated but is not
+required.
+2. Altered source versions must be plainly marked as such, and must not be
+misrepresented as being the original software.
 3. This notice may not be removed or altered from any source distribution.
 */
 
-///This file was written by Erwin Coumans
+/// This file was written by Erwin Coumans
 
 #ifndef BT_MULTIBODY_SPHERICAL_JOINT_MOTOR_H
 #define BT_MULTIBODY_SPHERICAL_JOINT_MOTOR_H
@@ -21,57 +26,47 @@ subject to the following restrictions:
 #include "btMultiBodyConstraint.h"
 struct btSolverInfo;
 
-class btMultiBodySphericalJointMotor : public btMultiBodyConstraint
-{
-protected:
-	btVector3 m_desiredVelocity;
-	btQuaternion m_desiredPosition;
-	btScalar m_kd;
-	btScalar m_kp;
-	btScalar m_erp;
-	btScalar m_rhsClamp;  //maximum error
+class btMultiBodySphericalJointMotor : public btMultiBodyConstraint {
+ protected:
+  btVector3 m_desiredVelocity;
+  btQuaternion m_desiredPosition;
+  btScalar m_kd;
+  btScalar m_kp;
+  btScalar m_erp;
+  btScalar m_rhsClamp;  // maximum error
 
-public:
-	btMultiBodySphericalJointMotor(btMultiBody* body, int link, btScalar maxMotorImpulse);
-	
-	virtual ~btMultiBodySphericalJointMotor();
-	virtual void finalizeMultiDof();
+ public:
+  btMultiBodySphericalJointMotor(btMultiBody* body, int link,
+                                 btScalar maxMotorImpulse);
 
-	virtual int getIslandIdA() const;
-	virtual int getIslandIdB() const;
+  virtual ~btMultiBodySphericalJointMotor();
+  virtual void finalizeMultiDof();
 
-	virtual void createConstraintRows(btMultiBodyConstraintArray& constraintRows,
-									  btMultiBodyJacobianData& data,
-									  const btContactSolverInfo& infoGlobal);
+  virtual int getIslandIdA() const;
+  virtual int getIslandIdB() const;
 
-	virtual void setVelocityTarget(const btVector3& velTarget, btScalar kd = 1.f)
-	{
-		m_desiredVelocity = velTarget;
-		m_kd = kd;
-	}
+  virtual void createConstraintRows(btMultiBodyConstraintArray& constraintRows,
+                                    btMultiBodyJacobianData& data,
+                                    const btContactSolverInfo& infoGlobal);
 
-	virtual void setPositionTarget(const btQuaternion& posTarget, btScalar kp = 1.f)
-	{
-		m_desiredPosition = posTarget;
-		m_kp = kp;
-	}
+  virtual void setVelocityTarget(const btVector3& velTarget,
+                                 btScalar kd = 1.f) {
+    m_desiredVelocity = velTarget;
+    m_kd = kd;
+  }
 
-	virtual void setErp(btScalar erp)
-	{
-		m_erp = erp;
-	}
-	virtual btScalar getErp() const
-	{
-		return m_erp;
-	}
-	virtual void setRhsClamp(btScalar rhsClamp)
-	{
-		m_rhsClamp = rhsClamp;
-	}
-	virtual void debugDraw(class btIDebugDraw* drawer)
-	{
-		//todo(erwincoumans)
-	}
+  virtual void setPositionTarget(const btQuaternion& posTarget,
+                                 btScalar kp = 1.f) {
+    m_desiredPosition = posTarget;
+    m_kp = kp;
+  }
+
+  virtual void setErp(btScalar erp) { m_erp = erp; }
+  virtual btScalar getErp() const { return m_erp; }
+  virtual void setRhsClamp(btScalar rhsClamp) { m_rhsClamp = rhsClamp; }
+  virtual void debugDraw(class btIDebugDraw* drawer) {
+    // todo(erwincoumans)
+  }
 };
 
-#endif  //BT_MULTIBODY_SPHERICAL_JOINT_MOTOR_H
+#endif  // BT_MULTIBODY_SPHERICAL_JOINT_MOTOR_H

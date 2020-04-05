@@ -75,20 +75,20 @@
 ** non-conventional directories.
 */
 #if defined(_WIN32) /* { */
-/*
-** In Windows, any exclamation mark ('!') in the path is replaced by the
-** path of the directory of the executable file of the current process.
-*/
+                    /*
+                    ** In Windows, any exclamation mark ('!') in the path is replaced by the
+                    ** path of the directory of the executable file of the current process.
+                    */
 #define LUA_LDIR "!\\lua\\"
 #define LUA_CDIR "!\\"
-#define LUA_PATH_DEFAULT                                                 \
-	LUA_LDIR "?.lua;" LUA_LDIR "?\\init.lua;" LUA_CDIR "?.lua;" LUA_CDIR \
-			 "?\\init.lua;"                                              \
-			 ".\\?.lua"
-#define LUA_CPATH_DEFAULT      \
-	LUA_CDIR "?.dll;" LUA_CDIR \
-			 "loadall.dll;"    \
-			 ".\\?.dll"
+#define LUA_PATH_DEFAULT                                               \
+  LUA_LDIR "?.lua;" LUA_LDIR "?\\init.lua;" LUA_CDIR "?.lua;" LUA_CDIR \
+           "?\\init.lua;"                                              \
+           ".\\?.lua"
+#define LUA_CPATH_DEFAULT    \
+  LUA_CDIR "?.dll;" LUA_CDIR \
+           "loadall.dll;"    \
+           ".\\?.dll"
 
 #else /* }{ */
 
@@ -96,14 +96,14 @@
 #define LUA_ROOT "/usr/local/"
 #define LUA_LDIR LUA_ROOT "share/lua/" LUA_VDIR
 #define LUA_CDIR LUA_ROOT "lib/lua/" LUA_VDIR
-#define LUA_PATH_DEFAULT                                                \
-	LUA_LDIR "?.lua;" LUA_LDIR "?/init.lua;" LUA_CDIR "?.lua;" LUA_CDIR \
-			 "?/init.lua;"                                              \
-			 "./?.lua"
-#define LUA_CPATH_DEFAULT     \
-	LUA_CDIR "?.so;" LUA_CDIR \
-			 "loadall.so;"    \
-			 "./?.so"
+#define LUA_PATH_DEFAULT                                              \
+  LUA_LDIR "?.lua;" LUA_LDIR "?/init.lua;" LUA_CDIR "?.lua;" LUA_CDIR \
+           "?/init.lua;"                                              \
+           "./?.lua"
+#define LUA_CPATH_DEFAULT   \
+  LUA_CDIR "?.so;" LUA_CDIR \
+           "loadall.so;"    \
+           "./?.so"
 #endif /* } */
 
 /*
@@ -166,7 +166,7 @@
 ** default definition.
 */
 #if defined(__GNUC__) && ((__GNUC__ * 100 + __GNUC_MINOR__) >= 302) && \
-	defined(__ELF__) /* { */
+    defined(__ELF__) /* { */
 #define LUAI_FUNC __attribute__((visibility("hidden"))) extern
 #define LUAI_DDEC LUAI_FUNC
 #define LUAI_DDEF /* empty */
@@ -206,8 +206,7 @@
 @@ luai_writestringerror defines how to print error messages.
 ** (A format string with one argument is enough for Lua...)
 */
-#define luai_writestringerror(s, p) \
-	(fprintf(stderr, (s), (p)), fflush(stderr))
+#define luai_writestringerror(s, p) (fprintf(stderr, (s), (p)), fflush(stderr))
 
 /*
 @@ LUAI_MAXSHORTLEN is the maximum length for short strings, that is,
@@ -246,10 +245,9 @@
 @@ macro 'lua_cpcall' emulates deprecated function lua_cpcall.
 ** You can call your C function directly (with light C functions).
 */
-#define lua_cpcall(L, f, u)         \
-	(lua_pushcfunction(L, (f)),     \
-	 lua_pushlightuserdata(L, (u)), \
-	 lua_pcall(L, 1, 0, 0))
+#define lua_cpcall(L, f, u)                                  \
+  (lua_pushcfunction(L, (f)), lua_pushlightuserdata(L, (u)), \
+   lua_pcall(L, 1, 0, 0))
 
 /*
 @@ LUA_COMPAT_LOG10 defines the function 'log10' in the math library.

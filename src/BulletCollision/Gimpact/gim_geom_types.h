@@ -28,7 +28,8 @@ email: projectileman@yahoo.com
  This library is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the files
- GIMPACT-LICENSE-LGPL.TXT, GIMPACT-LICENSE-ZLIB.TXT and GIMPACT-LICENSE-BSD.TXT for more details.
+ GIMPACT-LICENSE-LGPL.TXT, GIMPACT-LICENSE-ZLIB.TXT and GIMPACT-LICENSE-BSD.TXT
+for more details.
 
 -----------------------------------------------------------------------------
 */
@@ -87,6 +88,6 @@ typedef GREAL mat4f[4][4];
 //! Quaternion
 typedef GREAL quatf[4];
 
-//typedef struct _aabb3f aabb3f;
+// typedef struct _aabb3f aabb3f;
 
 #endif  // GIM_GEOM_TYPES_H_INCLUDED

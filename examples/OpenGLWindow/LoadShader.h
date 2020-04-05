@@ -4,11 +4,10 @@
 #include "OpenGLInclude.h"
 
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif  //__cplusplus
 
-	GLuint gltLoadShaderPair(const char *szVertexProg, const char *szFragmentProg);
+GLuint gltLoadShaderPair(const char *szVertexProg, const char *szFragmentProg);
 
 #ifdef __cplusplus
 }

@@ -84,8 +84,7 @@ template <typename TernaryOp, typename Arg1Type, typename Arg2Type,
 class CwiseTernaryOp : public CwiseTernaryOpImpl<
                            TernaryOp, Arg1Type, Arg2Type, Arg3Type,
                            typename internal::traits<Arg1Type>::StorageKind>,
-                       internal::no_assignment_operator
-{
+                       internal::no_assignment_operator {
  public:
   typedef typename internal::remove_all<Arg1Type>::type Arg1;
   typedef typename internal::remove_all<Arg2Type>::type Arg2;
@@ -113,14 +112,16 @@ class CwiseTernaryOp : public CwiseTernaryOpImpl<
     EIGEN_STATIC_ASSERT_SAME_MATRIX_SIZE(Arg1, Arg3)
 
     // The index types should match
-    EIGEN_STATIC_ASSERT((internal::is_same<
-                         typename internal::traits<Arg1Type>::StorageKind,
-                         typename internal::traits<Arg2Type>::StorageKind>::value),
-                        STORAGE_KIND_MUST_MATCH)
-    EIGEN_STATIC_ASSERT((internal::is_same<
-                         typename internal::traits<Arg1Type>::StorageKind,
-                         typename internal::traits<Arg3Type>::StorageKind>::value),
-                        STORAGE_KIND_MUST_MATCH)
+    EIGEN_STATIC_ASSERT(
+        (internal::is_same<
+            typename internal::traits<Arg1Type>::StorageKind,
+            typename internal::traits<Arg2Type>::StorageKind>::value),
+        STORAGE_KIND_MUST_MATCH)
+    EIGEN_STATIC_ASSERT(
+        (internal::is_same<
+            typename internal::traits<Arg1Type>::StorageKind,
+            typename internal::traits<Arg3Type>::StorageKind>::value),
+        STORAGE_KIND_MUST_MATCH)
 
     eigen_assert(a1.rows() == a2.rows() && a1.cols() == a2.cols() &&
                  a1.rows() == a3.rows() && a1.cols() == a3.cols());

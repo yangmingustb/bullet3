@@ -1,176 +1,154 @@
 /* Copyright (C) 2015 Google
 
 This software is provided 'as-is', without any express or implied warranty.
-In no event will the authors be held liable for any damages arising from the use of this software.
+In no event will the authors be held liable for any damages arising from the use
+of this software.
 Permission is granted to anyone to use this software for any purpose,
 including commercial applications, and to alter it and redistribute it freely,
 subject to the following restrictions:
 
-1. The origin of this software must not be misrepresented; you must not claim that you wrote the original software. If you use this software in a product, an acknowledgment in the product documentation would be appreciated but is not required.
-2. Altered source versions must be plainly marked as such, and must not be misrepresented as being the original software.
+1. The origin of this software must not be misrepresented; you must not claim
+that you wrote the original software. If you use this software in a product, an
+acknowledgment in the product documentation would be appreciated but is not
+required.
+2. Altered source versions must be plainly marked as such, and must not be
+misrepresented as being the original software.
 3. This notice may not be removed or altered from any source distribution.
 */
 
 #include "PhysXUrdfImporter.h"
 #include "../../CommonInterfaces/CommonRenderInterface.h"
-#include "../../ThirdPartyLibs/Wavefront/tiny_obj_loader.h"
 #include "../../Importers/ImportURDFDemo/URDFImporterInterface.h"
+#include "../../ThirdPartyLibs/Wavefront/tiny_obj_loader.h"
 
+#include "../../Importers/ImportColladaDemo/LoadMeshFromCollada.h"
 #include "../../Importers/ImportObjDemo/LoadMeshFromObj.h"
 #include "../../Importers/ImportSTLDemo/LoadMeshFromSTL.h"
-#include "../../Importers/ImportColladaDemo/LoadMeshFromCollada.h"
-//#include "BulletCollision/CollisionShapes/btShapeHull.h"  //to create a tesselation of a generic btConvexShape
-#include "../../CommonInterfaces/CommonGUIHelperInterface.h"
-#include "../../CommonInterfaces/CommonFileIOInterface.h"
-#include "Bullet3Common/b3FileUtils.h"
+//#include "BulletCollision/CollisionShapes/btShapeHull.h"  //to create a
+//tesselation of a generic btConvexShape
 #include <string>
-#include "../../Utils/b3ResourcePath.h"
+#include "../../CommonInterfaces/CommonFileIOInterface.h"
+#include "../../CommonInterfaces/CommonGUIHelperInterface.h"
 #include "../../Utils/b3BulletDefaultFileIO.h"
+#include "../../Utils/b3ResourcePath.h"
+#include "Bullet3Common/b3FileUtils.h"
 
 #include "../OpenGLWindow/ShapeData.h"
-
 
 #include "../../Importers/ImportMeshUtility/b3ImportMeshUtility.h"
 
 static btScalar gUrdfDefaultCollisionMargin = 0.001;
 
-#include <iostream>
 #include <fstream>
+#include <iostream>
 #include <list>
 #include "../../Importers/ImportURDFDemo/URDFJointTypes.h"
 #include "../../Importers/ImportURDFDemo/UrdfParser.h"
 
-
 ATTRIBUTE_ALIGNED16(struct)
-PhysXURDFInternalData
-{
-	BT_DECLARE_ALIGNED_ALLOCATOR();
-	b3BulletDefaultFileIO m_defaultFileIO;
-	UrdfParser m_urdfParser;
-	struct GUIHelperInterface* m_guiHelper;
-	struct CommonFileIOInterface* m_fileIO;
-	std::string m_sourceFile;
-	char m_pathPrefix[1024];
-	int m_bodyId;
-	btHashMap<btHashInt, UrdfMaterialColor> m_linkColors;
-	btAlignedObjectArray<btCollisionShape*> m_allocatedCollisionShapes;
-	btAlignedObjectArray<int> m_allocatedTextures;
-	//mutable btAlignedObjectArray<btTriangleMesh*> m_allocatedMeshInterfaces;
-	btHashMap<btHashPtr, UrdfCollision> m_bulletCollisionShape2UrdfCollision;
+PhysXURDFInternalData {
+  BT_DECLARE_ALIGNED_ALLOCATOR();
+  b3BulletDefaultFileIO m_defaultFileIO;
+  UrdfParser m_urdfParser;
+  struct GUIHelperInterface* m_guiHelper;
+  struct CommonFileIOInterface* m_fileIO;
+  std::string m_sourceFile;
+  char m_pathPrefix[1024];
+  int m_bodyId;
+  btHashMap<btHashInt, UrdfMaterialColor> m_linkColors;
+  btAlignedObjectArray<btCollisionShape*> m_allocatedCollisionShapes;
+  btAlignedObjectArray<int> m_allocatedTextures;
+  // mutable btAlignedObjectArray<btTriangleMesh*> m_allocatedMeshInterfaces;
+  btHashMap<btHashPtr, UrdfCollision> m_bulletCollisionShape2UrdfCollision;
 
-	UrdfRenderingInterface* m_customVisualShapesConverter;
-	bool m_enableTinyRenderer;
-	int m_flags;
+  UrdfRenderingInterface* m_customVisualShapesConverter;
+  bool m_enableTinyRenderer;
+  int m_flags;
 
-	void setSourceFile(const std::string& relativeFileName, const std::string& prefix)
-	{
-		m_sourceFile = relativeFileName;
-		m_urdfParser.setSourceFile(relativeFileName);
-		strncpy(m_pathPrefix, prefix.c_str(), sizeof(m_pathPrefix));
-		m_pathPrefix[sizeof(m_pathPrefix) - 1] = 0;  // required, strncpy doesn't write zero on overflow
-	}
+  void setSourceFile(const std::string& relativeFileName,
+                     const std::string& prefix) {
+    m_sourceFile = relativeFileName;
+    m_urdfParser.setSourceFile(relativeFileName);
+    strncpy(m_pathPrefix, prefix.c_str(), sizeof(m_pathPrefix));
+    m_pathPrefix[sizeof(m_pathPrefix) - 1] =
+        0;  // required, strncpy doesn't write zero on overflow
+  }
 
-	PhysXURDFInternalData(CommonFileIOInterface* fileIO)
-		:m_urdfParser(fileIO? fileIO : &m_defaultFileIO),
-		m_fileIO(fileIO? fileIO : &m_defaultFileIO)
-	{
-		m_enableTinyRenderer = true;
-		m_pathPrefix[0] = 0;
-		m_flags = 0;
-	}
+  PhysXURDFInternalData(CommonFileIOInterface * fileIO)
+      : m_urdfParser(fileIO ? fileIO : &m_defaultFileIO),
+        m_fileIO(fileIO ? fileIO : &m_defaultFileIO) {
+    m_enableTinyRenderer = true;
+    m_pathPrefix[0] = 0;
+    m_flags = 0;
+  }
 
-	void setGlobalScaling(btScalar scaling)
-	{
-		m_urdfParser.setGlobalScaling(scaling);
-	}
-
-
+  void setGlobalScaling(btScalar scaling) {
+    m_urdfParser.setGlobalScaling(scaling);
+  }
 };
 
-void PhysXURDFImporter::printTree()
-{
-	//	btAssert(0);
+void PhysXURDFImporter::printTree() {
+  //	btAssert(0);
 }
 
-
-
-
-PhysXURDFImporter::PhysXURDFImporter(struct CommonFileIOInterface* fileIO,double globalScaling, int flags)
-{
-	m_data = new PhysXURDFInternalData(fileIO);
-	m_data->setGlobalScaling(globalScaling);
-	m_data->m_flags = flags;
+PhysXURDFImporter::PhysXURDFImporter(struct CommonFileIOInterface* fileIO,
+                                     double globalScaling, int flags) {
+  m_data = new PhysXURDFInternalData(fileIO);
+  m_data->setGlobalScaling(globalScaling);
+  m_data->m_flags = flags;
 }
 
-struct PhysXErrorLogger : public ErrorLogger
-{
-	int m_numErrors;
-	int m_numWarnings;
+struct PhysXErrorLogger : public ErrorLogger {
+  int m_numErrors;
+  int m_numWarnings;
 
-	PhysXErrorLogger()
-		: m_numErrors(0),
-		  m_numWarnings(0)
-	{
-	}
-	virtual void reportError(const char* error)
-	{
-		m_numErrors++;
-		b3Error(error);
-	}
-	virtual void reportWarning(const char* warning)
-	{
-		m_numWarnings++;
-		b3Warning(warning);
-	}
+  PhysXErrorLogger() : m_numErrors(0), m_numWarnings(0) {}
+  virtual void reportError(const char* error) {
+    m_numErrors++;
+    b3Error(error);
+  }
+  virtual void reportWarning(const char* warning) {
+    m_numWarnings++;
+    b3Warning(warning);
+  }
 
-	virtual void printMessage(const char* msg)
-	{
-		b3Printf(msg);
-	}
+  virtual void printMessage(const char* msg) { b3Printf(msg); }
 };
 
-bool PhysXURDFImporter::loadURDF(const char* fileName, bool forceFixedBase)
-{
-	if (strlen(fileName) == 0)
-		return false;
+bool PhysXURDFImporter::loadURDF(const char* fileName, bool forceFixedBase) {
+  if (strlen(fileName) == 0) return false;
 
-	//int argc=0;
-	char relativeFileName[1024];
+  // int argc=0;
+  char relativeFileName[1024];
 
-	b3FileUtils fu;
+  b3FileUtils fu;
 
-	//bool fileFound = fu.findFile(fileName, relativeFileName, 1024);
-	bool fileFound = m_data->m_fileIO->findResourcePath(fileName, relativeFileName, 1024);
+  // bool fileFound = fu.findFile(fileName, relativeFileName, 1024);
+  bool fileFound =
+      m_data->m_fileIO->findResourcePath(fileName, relativeFileName, 1024);
 
-	std::string xml_string;
+  std::string xml_string;
 
-	if (!fileFound)
-	{
-		b3Warning("URDF file '%s' not found\n", fileName);
-		return false;
-	}
-	else
-	{
-		char path[1024];
-		fu.extractPath(relativeFileName, path, sizeof(path));
-		m_data->setSourceFile(relativeFileName, path);
+  if (!fileFound) {
+    b3Warning("URDF file '%s' not found\n", fileName);
+    return false;
+  } else {
+    char path[1024];
+    fu.extractPath(relativeFileName, path, sizeof(path));
+    m_data->setSourceFile(relativeFileName, path);
 
-		//read file
-		int fileId = m_data->m_fileIO->fileOpen(relativeFileName,"r");
+    // read file
+    int fileId = m_data->m_fileIO->fileOpen(relativeFileName, "r");
 
-
-		char destBuffer[8192];
-		char* line = 0;
-		do
-		{
-			line = m_data->m_fileIO->readLine(fileId, destBuffer, 8192);
-			if (line)
-			{
-				xml_string += (std::string(destBuffer) + "\n");
-			}
-		}
-		while (line);
-		m_data->m_fileIO->fileClose(fileId);
+    char destBuffer[8192];
+    char* line = 0;
+    do {
+      line = m_data->m_fileIO->readLine(fileId, destBuffer, 8192);
+      if (line) {
+        xml_string += (std::string(destBuffer) + "\n");
+      }
+    } while (line);
+    m_data->m_fileIO->fileClose(fileId);
 #if 0
 		std::fstream xml_file(relativeFileName, std::fstream::in);
 		while (xml_file.good())
@@ -181,359 +159,330 @@ bool PhysXURDFImporter::loadURDF(const char* fileName, bool forceFixedBase)
 		}
 		xml_file.close();
 #endif
+  }
 
-	}
+  PhysXErrorLogger loggie;
+  m_data->m_urdfParser.setParseSDF(false);
+  bool result = false;
 
-	PhysXErrorLogger loggie;
-	m_data->m_urdfParser.setParseSDF(false);
-	bool result = false;
+  if (xml_string.length()) {
+    result = m_data->m_urdfParser.loadUrdf(
+        xml_string.c_str(), &loggie, forceFixedBase,
+        (m_data->m_flags & CUF_PARSE_SENSORS));
+  }
 
-	if (xml_string.length())
-	{
-			result = m_data->m_urdfParser.loadUrdf(xml_string.c_str(), &loggie, forceFixedBase, (m_data->m_flags & CUF_PARSE_SENSORS));
-	}
-
-	return result;
+  return result;
 }
 
-int PhysXURDFImporter::getNumModels() const
-{
-	return m_data->m_urdfParser.getNumModels();
+int PhysXURDFImporter::getNumModels() const {
+  return m_data->m_urdfParser.getNumModels();
 }
 
-void PhysXURDFImporter::activateModel(int modelIndex)
-{
-	m_data->m_urdfParser.activateModel(modelIndex);
+void PhysXURDFImporter::activateModel(int modelIndex) {
+  m_data->m_urdfParser.activateModel(modelIndex);
 }
 
-bool PhysXURDFImporter::loadSDF(const char* fileName, bool forceFixedBase)
-{
-	//int argc=0;
-	char relativeFileName[1024];
+bool PhysXURDFImporter::loadSDF(const char* fileName, bool forceFixedBase) {
+  // int argc=0;
+  char relativeFileName[1024];
 
-	b3FileUtils fu;
+  b3FileUtils fu;
 
-	//bool fileFound = fu.findFile(fileName, relativeFileName, 1024);
-	bool fileFound = (m_data->m_fileIO->findResourcePath(fileName, relativeFileName, 1024));
+  // bool fileFound = fu.findFile(fileName, relativeFileName, 1024);
+  bool fileFound =
+      (m_data->m_fileIO->findResourcePath(fileName, relativeFileName, 1024));
 
-	std::string xml_string;
+  std::string xml_string;
 
-	if (!fileFound)
-	{
-		b3Warning("SDF file '%s' not found\n", fileName);
-		return false;
-	}
-	else
-	{
+  if (!fileFound) {
+    b3Warning("SDF file '%s' not found\n", fileName);
+    return false;
+  } else {
+    char path[1024];
+    fu.extractPath(relativeFileName, path, sizeof(path));
+    m_data->setSourceFile(relativeFileName, path);
 
-		char path[1024];
-		fu.extractPath(relativeFileName, path, sizeof(path));
-		m_data->setSourceFile(relativeFileName, path);
+    // read file
+    int fileId = m_data->m_fileIO->fileOpen(relativeFileName, "r");
 
-		//read file
-		int fileId = m_data->m_fileIO->fileOpen(relativeFileName,"r");
+    char destBuffer[8192];
+    char* line = 0;
+    do {
+      line = m_data->m_fileIO->readLine(fileId, destBuffer, 8192);
+      if (line) {
+        xml_string += (std::string(destBuffer) + "\n");
+      }
+    } while (line);
+    m_data->m_fileIO->fileClose(fileId);
+  }
 
-		char destBuffer[8192];
-		char* line = 0;
-		do
-		{
-			line = m_data->m_fileIO->readLine(fileId, destBuffer, 8192);
-			if (line)
-			{
-				xml_string += (std::string(destBuffer) + "\n");
-			}
-		}
-		while (line);
-		m_data->m_fileIO->fileClose(fileId);
-	}
+  PhysXErrorLogger loggie;
+  // todo: quick test to see if we can re-use the URDF parser for SDF or not
+  m_data->m_urdfParser.setParseSDF(true);
+  bool result = false;
+  if (xml_string.length()) {
+    result = m_data->m_urdfParser.loadSDF(xml_string.c_str(), &loggie);
+  }
 
-	PhysXErrorLogger loggie;
-	//todo: quick test to see if we can re-use the URDF parser for SDF or not
-	m_data->m_urdfParser.setParseSDF(true);
-	bool result = false;
-	if (xml_string.length())
-	{
-		result = m_data->m_urdfParser.loadSDF(xml_string.c_str(), &loggie);
-	}
-
-	return result;
+  return result;
 }
 
-const char* PhysXURDFImporter::getPathPrefix()
-{
-	return m_data->m_pathPrefix;
+const char* PhysXURDFImporter::getPathPrefix() { return m_data->m_pathPrefix; }
+
+void PhysXURDFImporter::setBodyUniqueId(int bodyId) {
+  m_data->m_bodyId = bodyId;
 }
 
-void PhysXURDFImporter::setBodyUniqueId(int bodyId)
-{
-	m_data->m_bodyId = bodyId;
-}
+int PhysXURDFImporter::getBodyUniqueId() const { return m_data->m_bodyId; }
 
-int PhysXURDFImporter::getBodyUniqueId() const
-{
-	return m_data->m_bodyId;
-}
+PhysXURDFImporter::~PhysXURDFImporter() { delete m_data; }
 
-PhysXURDFImporter::~PhysXURDFImporter()
-{
-	delete m_data;
-}
-
-int PhysXURDFImporter::getRootLinkIndex() const
-{
-	if (m_data->m_urdfParser.getModel().m_rootLinks.size() == 1)
-	{
-		return m_data->m_urdfParser.getModel().m_rootLinks[0]->m_linkIndex;
-	}
-	return -1;
+int PhysXURDFImporter::getRootLinkIndex() const {
+  if (m_data->m_urdfParser.getModel().m_rootLinks.size() == 1) {
+    return m_data->m_urdfParser.getModel().m_rootLinks[0]->m_linkIndex;
+  }
+  return -1;
 };
 
-void PhysXURDFImporter::getLinkChildIndices(int linkIndex, btAlignedObjectArray<int>& childLinkIndices) const
-{
-	childLinkIndices.resize(0);
-	UrdfLink* const* linkPtr = m_data->m_urdfParser.getModel().m_links.getAtIndex(linkIndex);
-	if (linkPtr)
-	{
-		const UrdfLink* link = *linkPtr;
-		//int numChildren = m_data->m_urdfParser->getModel().m_links.getAtIndex(linkIndex)->
+void PhysXURDFImporter::getLinkChildIndices(
+    int linkIndex, btAlignedObjectArray<int>& childLinkIndices) const {
+  childLinkIndices.resize(0);
+  UrdfLink* const* linkPtr =
+      m_data->m_urdfParser.getModel().m_links.getAtIndex(linkIndex);
+  if (linkPtr) {
+    const UrdfLink* link = *linkPtr;
+    // int numChildren =
+    // m_data->m_urdfParser->getModel().m_links.getAtIndex(linkIndex)->
 
-		for (int i = 0; i < link->m_childLinks.size(); i++)
-		{
-			int childIndex = link->m_childLinks[i]->m_linkIndex;
-			childLinkIndices.push_back(childIndex);
-		}
-	}
+    for (int i = 0; i < link->m_childLinks.size(); i++) {
+      int childIndex = link->m_childLinks[i]->m_linkIndex;
+      childLinkIndices.push_back(childIndex);
+    }
+  }
 }
 
-std::string PhysXURDFImporter::getLinkName(int linkIndex) const
-{
-	UrdfLink* const* linkPtr = m_data->m_urdfParser.getModel().m_links.getAtIndex(linkIndex);
-	btAssert(linkPtr);
-	if (linkPtr)
-	{
-		UrdfLink* link = *linkPtr;
-		return link->m_name;
-	}
-	return "";
+std::string PhysXURDFImporter::getLinkName(int linkIndex) const {
+  UrdfLink* const* linkPtr =
+      m_data->m_urdfParser.getModel().m_links.getAtIndex(linkIndex);
+  btAssert(linkPtr);
+  if (linkPtr) {
+    UrdfLink* link = *linkPtr;
+    return link->m_name;
+  }
+  return "";
 }
 
-std::string PhysXURDFImporter::getBodyName() const
-{
-	return m_data->m_urdfParser.getModel().m_name;
+std::string PhysXURDFImporter::getBodyName() const {
+  return m_data->m_urdfParser.getModel().m_name;
 }
 
-std::string PhysXURDFImporter::getJointName(int linkIndex) const
-{
-	UrdfLink* const* linkPtr = m_data->m_urdfParser.getModel().m_links.getAtIndex(linkIndex);
-	btAssert(linkPtr);
-	if (linkPtr)
-	{
-		UrdfLink* link = *linkPtr;
-		if (link->m_parentJoint)
-		{
-			return link->m_parentJoint->m_name;
-		}
-	}
-	return "";
+std::string PhysXURDFImporter::getJointName(int linkIndex) const {
+  UrdfLink* const* linkPtr =
+      m_data->m_urdfParser.getModel().m_links.getAtIndex(linkIndex);
+  btAssert(linkPtr);
+  if (linkPtr) {
+    UrdfLink* link = *linkPtr;
+    if (link->m_parentJoint) {
+      return link->m_parentJoint->m_name;
+    }
+  }
+  return "";
 }
 
-void PhysXURDFImporter::getMassAndInertia2(int urdfLinkIndex, btScalar& mass, btVector3& localInertiaDiagonal, btTransform& inertialFrame, int flags) const
-{
-	if (flags & CUF_USE_URDF_INERTIA)
-	{
-		getMassAndInertia(urdfLinkIndex, mass, localInertiaDiagonal, inertialFrame);
-	}
-	else
-	{
-		//the link->m_inertia is NOT necessarily aligned with the inertial frame
-		//so an additional transform might need to be computed
-		UrdfLink* const* linkPtr = m_data->m_urdfParser.getModel().m_links.getAtIndex(urdfLinkIndex);
+void PhysXURDFImporter::getMassAndInertia2(int urdfLinkIndex, btScalar& mass,
+                                           btVector3& localInertiaDiagonal,
+                                           btTransform& inertialFrame,
+                                           int flags) const {
+  if (flags & CUF_USE_URDF_INERTIA) {
+    getMassAndInertia(urdfLinkIndex, mass, localInertiaDiagonal, inertialFrame);
+  } else {
+    // the link->m_inertia is NOT necessarily aligned with the inertial frame
+    // so an additional transform might need to be computed
+    UrdfLink* const* linkPtr =
+        m_data->m_urdfParser.getModel().m_links.getAtIndex(urdfLinkIndex);
 
-		btAssert(linkPtr);
-		if (linkPtr)
-		{
-			UrdfLink* link = *linkPtr;
-			btScalar linkMass;
-			if (link->m_parentJoint == 0 && m_data->m_urdfParser.getModel().m_overrideFixedBase)
-			{
-				linkMass = 0.f;
-			}
-			else
-			{
-				linkMass = link->m_inertia.m_mass;
-			}
-			mass = linkMass;
-			localInertiaDiagonal.setValue(0, 0, 0);
-			inertialFrame.setOrigin(link->m_inertia.m_linkLocalFrame.getOrigin());
-			inertialFrame.setBasis(link->m_inertia.m_linkLocalFrame.getBasis());
-		}
-		else
-		{
-			mass = 1.f;
-			localInertiaDiagonal.setValue(1, 1, 1);
-			inertialFrame.setIdentity();
-		}
-	}
+    btAssert(linkPtr);
+    if (linkPtr) {
+      UrdfLink* link = *linkPtr;
+      btScalar linkMass;
+      if (link->m_parentJoint == 0 &&
+          m_data->m_urdfParser.getModel().m_overrideFixedBase) {
+        linkMass = 0.f;
+      } else {
+        linkMass = link->m_inertia.m_mass;
+      }
+      mass = linkMass;
+      localInertiaDiagonal.setValue(0, 0, 0);
+      inertialFrame.setOrigin(link->m_inertia.m_linkLocalFrame.getOrigin());
+      inertialFrame.setBasis(link->m_inertia.m_linkLocalFrame.getBasis());
+    } else {
+      mass = 1.f;
+      localInertiaDiagonal.setValue(1, 1, 1);
+      inertialFrame.setIdentity();
+    }
+  }
 }
 
-void PhysXURDFImporter::getMassAndInertia(int linkIndex, btScalar& mass, btVector3& localInertiaDiagonal, btTransform& inertialFrame) const
-{
-	//the link->m_inertia is NOT necessarily aligned with the inertial frame
-	//so an additional transform might need to be computed
-	UrdfLink* const* linkPtr = m_data->m_urdfParser.getModel().m_links.getAtIndex(linkIndex);
+void PhysXURDFImporter::getMassAndInertia(int linkIndex, btScalar& mass,
+                                          btVector3& localInertiaDiagonal,
+                                          btTransform& inertialFrame) const {
+  // the link->m_inertia is NOT necessarily aligned with the inertial frame
+  // so an additional transform might need to be computed
+  UrdfLink* const* linkPtr =
+      m_data->m_urdfParser.getModel().m_links.getAtIndex(linkIndex);
 
-	btAssert(linkPtr);
-	if (linkPtr)
-	{
-		UrdfLink* link = *linkPtr;
-		btMatrix3x3 linkInertiaBasis;
-		btScalar linkMass, principalInertiaX, principalInertiaY, principalInertiaZ;
-		if (link->m_parentJoint == 0 && m_data->m_urdfParser.getModel().m_overrideFixedBase)
-		{
-			linkMass = 0.f;
-			principalInertiaX = 0.f;
-			principalInertiaY = 0.f;
-			principalInertiaZ = 0.f;
-			linkInertiaBasis.setIdentity();
-		}
-		else
-		{
-			linkMass = link->m_inertia.m_mass;
-			if (link->m_inertia.m_ixy == 0.0 &&
-				link->m_inertia.m_ixz == 0.0 &&
-				link->m_inertia.m_iyz == 0.0)
-			{
-				principalInertiaX = link->m_inertia.m_ixx;
-				principalInertiaY = link->m_inertia.m_iyy;
-				principalInertiaZ = link->m_inertia.m_izz;
-				linkInertiaBasis.setIdentity();
-			}
-			else
-			{
-				principalInertiaX = link->m_inertia.m_ixx;
-				btMatrix3x3 inertiaTensor(link->m_inertia.m_ixx, link->m_inertia.m_ixy, link->m_inertia.m_ixz,
-										  link->m_inertia.m_ixy, link->m_inertia.m_iyy, link->m_inertia.m_iyz,
-										  link->m_inertia.m_ixz, link->m_inertia.m_iyz, link->m_inertia.m_izz);
-				btScalar threshold = 1.0e-6;
-				int numIterations = 30;
-				inertiaTensor.diagonalize(linkInertiaBasis, threshold, numIterations);
-				principalInertiaX = inertiaTensor[0][0];
-				principalInertiaY = inertiaTensor[1][1];
-				principalInertiaZ = inertiaTensor[2][2];
-			}
-		}
-		mass = linkMass;
-		if (principalInertiaX < 0 ||
-			principalInertiaX > (principalInertiaY + principalInertiaZ) ||
-			principalInertiaY < 0 ||
-			principalInertiaY > (principalInertiaX + principalInertiaZ) ||
-			principalInertiaZ < 0 ||
-			principalInertiaZ > (principalInertiaX + principalInertiaY))
-		{
-			b3Warning("Bad inertia tensor properties, setting inertia to zero for link: %s\n", link->m_name.c_str());
-			principalInertiaX = 0.f;
-			principalInertiaY = 0.f;
-			principalInertiaZ = 0.f;
-			linkInertiaBasis.setIdentity();
-		}
-		localInertiaDiagonal.setValue(principalInertiaX, principalInertiaY, principalInertiaZ);
-		inertialFrame.setOrigin(link->m_inertia.m_linkLocalFrame.getOrigin());
-		inertialFrame.setBasis(link->m_inertia.m_linkLocalFrame.getBasis() * linkInertiaBasis);
-	}
-	else
-	{
-		mass = 1.f;
-		localInertiaDiagonal.setValue(1, 1, 1);
-		inertialFrame.setIdentity();
-	}
+  btAssert(linkPtr);
+  if (linkPtr) {
+    UrdfLink* link = *linkPtr;
+    btMatrix3x3 linkInertiaBasis;
+    btScalar linkMass, principalInertiaX, principalInertiaY, principalInertiaZ;
+    if (link->m_parentJoint == 0 &&
+        m_data->m_urdfParser.getModel().m_overrideFixedBase) {
+      linkMass = 0.f;
+      principalInertiaX = 0.f;
+      principalInertiaY = 0.f;
+      principalInertiaZ = 0.f;
+      linkInertiaBasis.setIdentity();
+    } else {
+      linkMass = link->m_inertia.m_mass;
+      if (link->m_inertia.m_ixy == 0.0 && link->m_inertia.m_ixz == 0.0 &&
+          link->m_inertia.m_iyz == 0.0) {
+        principalInertiaX = link->m_inertia.m_ixx;
+        principalInertiaY = link->m_inertia.m_iyy;
+        principalInertiaZ = link->m_inertia.m_izz;
+        linkInertiaBasis.setIdentity();
+      } else {
+        principalInertiaX = link->m_inertia.m_ixx;
+        btMatrix3x3 inertiaTensor(link->m_inertia.m_ixx, link->m_inertia.m_ixy,
+                                  link->m_inertia.m_ixz, link->m_inertia.m_ixy,
+                                  link->m_inertia.m_iyy, link->m_inertia.m_iyz,
+                                  link->m_inertia.m_ixz, link->m_inertia.m_iyz,
+                                  link->m_inertia.m_izz);
+        btScalar threshold = 1.0e-6;
+        int numIterations = 30;
+        inertiaTensor.diagonalize(linkInertiaBasis, threshold, numIterations);
+        principalInertiaX = inertiaTensor[0][0];
+        principalInertiaY = inertiaTensor[1][1];
+        principalInertiaZ = inertiaTensor[2][2];
+      }
+    }
+    mass = linkMass;
+    if (principalInertiaX < 0 ||
+        principalInertiaX > (principalInertiaY + principalInertiaZ) ||
+        principalInertiaY < 0 ||
+        principalInertiaY > (principalInertiaX + principalInertiaZ) ||
+        principalInertiaZ < 0 ||
+        principalInertiaZ > (principalInertiaX + principalInertiaY)) {
+      b3Warning(
+          "Bad inertia tensor properties, setting inertia to zero for link: "
+          "%s\n",
+          link->m_name.c_str());
+      principalInertiaX = 0.f;
+      principalInertiaY = 0.f;
+      principalInertiaZ = 0.f;
+      linkInertiaBasis.setIdentity();
+    }
+    localInertiaDiagonal.setValue(principalInertiaX, principalInertiaY,
+                                  principalInertiaZ);
+    inertialFrame.setOrigin(link->m_inertia.m_linkLocalFrame.getOrigin());
+    inertialFrame.setBasis(link->m_inertia.m_linkLocalFrame.getBasis() *
+                           linkInertiaBasis);
+  } else {
+    mass = 1.f;
+    localInertiaDiagonal.setValue(1, 1, 1);
+    inertialFrame.setIdentity();
+  }
 }
 
-bool PhysXURDFImporter::getJointInfo2(int urdfLinkIndex, btTransform& parent2joint, btTransform& linkTransformInWorld, btVector3& jointAxisInJointSpace, int& jointType, btScalar& jointLowerLimit, btScalar& jointUpperLimit, btScalar& jointDamping, btScalar& jointFriction, btScalar& jointMaxForce, btScalar& jointMaxVelocity) const
-{
-	jointLowerLimit = 0.f;
-	jointUpperLimit = 0.f;
-	jointDamping = 0.f;
-	jointFriction = 0.f;
-	jointMaxForce = 0.f;
-	jointMaxVelocity = 0.f;
+bool PhysXURDFImporter::getJointInfo2(
+    int urdfLinkIndex, btTransform& parent2joint,
+    btTransform& linkTransformInWorld, btVector3& jointAxisInJointSpace,
+    int& jointType, btScalar& jointLowerLimit, btScalar& jointUpperLimit,
+    btScalar& jointDamping, btScalar& jointFriction, btScalar& jointMaxForce,
+    btScalar& jointMaxVelocity) const {
+  jointLowerLimit = 0.f;
+  jointUpperLimit = 0.f;
+  jointDamping = 0.f;
+  jointFriction = 0.f;
+  jointMaxForce = 0.f;
+  jointMaxVelocity = 0.f;
 
-	UrdfLink* const* linkPtr = m_data->m_urdfParser.getModel().m_links.getAtIndex(urdfLinkIndex);
-	btAssert(linkPtr);
-	if (linkPtr)
-	{
-		UrdfLink* link = *linkPtr;
-		linkTransformInWorld = link->m_linkTransformInWorld;
+  UrdfLink* const* linkPtr =
+      m_data->m_urdfParser.getModel().m_links.getAtIndex(urdfLinkIndex);
+  btAssert(linkPtr);
+  if (linkPtr) {
+    UrdfLink* link = *linkPtr;
+    linkTransformInWorld = link->m_linkTransformInWorld;
 
-		if (link->m_parentJoint)
-		{
-			UrdfJoint* pj = link->m_parentJoint;
-			parent2joint = pj->m_parentLinkToJointTransform;
-			jointType = pj->m_type;
-			jointAxisInJointSpace = pj->m_localJointAxis;
-			jointLowerLimit = pj->m_lowerLimit;
-			jointUpperLimit = pj->m_upperLimit;
-			jointDamping = pj->m_jointDamping;
-			jointFriction = pj->m_jointFriction;
-			jointMaxForce = pj->m_effortLimit;
-			jointMaxVelocity = pj->m_velocityLimit;
-			return true;
-		}
-		else
-		{
-			parent2joint.setIdentity();
-			return false;
-		}
-	}
+    if (link->m_parentJoint) {
+      UrdfJoint* pj = link->m_parentJoint;
+      parent2joint = pj->m_parentLinkToJointTransform;
+      jointType = pj->m_type;
+      jointAxisInJointSpace = pj->m_localJointAxis;
+      jointLowerLimit = pj->m_lowerLimit;
+      jointUpperLimit = pj->m_upperLimit;
+      jointDamping = pj->m_jointDamping;
+      jointFriction = pj->m_jointFriction;
+      jointMaxForce = pj->m_effortLimit;
+      jointMaxVelocity = pj->m_velocityLimit;
+      return true;
+    } else {
+      parent2joint.setIdentity();
+      return false;
+    }
+  }
 
-	return false;
+  return false;
 };
 
-bool PhysXURDFImporter::getJointInfo(int urdfLinkIndex, btTransform& parent2joint, btTransform& linkTransformInWorld, btVector3& jointAxisInJointSpace, int& jointType, btScalar& jointLowerLimit, btScalar& jointUpperLimit, btScalar& jointDamping, btScalar& jointFriction) const
-{
-	btScalar jointMaxForce;
-	btScalar jointMaxVelocity;
-	return getJointInfo2(urdfLinkIndex, parent2joint, linkTransformInWorld, jointAxisInJointSpace, jointType, jointLowerLimit, jointUpperLimit, jointDamping, jointFriction, jointMaxForce, jointMaxVelocity);
+bool PhysXURDFImporter::getJointInfo(
+    int urdfLinkIndex, btTransform& parent2joint,
+    btTransform& linkTransformInWorld, btVector3& jointAxisInJointSpace,
+    int& jointType, btScalar& jointLowerLimit, btScalar& jointUpperLimit,
+    btScalar& jointDamping, btScalar& jointFriction) const {
+  btScalar jointMaxForce;
+  btScalar jointMaxVelocity;
+  return getJointInfo2(urdfLinkIndex, parent2joint, linkTransformInWorld,
+                       jointAxisInJointSpace, jointType, jointLowerLimit,
+                       jointUpperLimit, jointDamping, jointFriction,
+                       jointMaxForce, jointMaxVelocity);
 }
 
-void PhysXURDFImporter::setRootTransformInWorld(const btTransform& rootTransformInWorld)
-{
-	m_data->m_urdfParser.getModel().m_rootTransformInWorld = rootTransformInWorld;
+void PhysXURDFImporter::setRootTransformInWorld(
+    const btTransform& rootTransformInWorld) {
+  m_data->m_urdfParser.getModel().m_rootTransformInWorld = rootTransformInWorld;
 }
 
-bool PhysXURDFImporter::getRootTransformInWorld(btTransform& rootTransformInWorld) const
-{
-	rootTransformInWorld = m_data->m_urdfParser.getModel().m_rootTransformInWorld;
-	return true;
+bool PhysXURDFImporter::getRootTransformInWorld(
+    btTransform& rootTransformInWorld) const {
+  rootTransformInWorld = m_data->m_urdfParser.getModel().m_rootTransformInWorld;
+  return true;
 }
 
-
-const struct UrdfLink* PhysXURDFImporter::getUrdfLink(int urdfLinkIndex) const
-{
-	UrdfLink* const* linkPtr = m_data->m_urdfParser.getModel().m_links.getAtIndex(urdfLinkIndex);
-	btAssert(linkPtr);
-	if (linkPtr)
-	{
-		const UrdfLink* link = *linkPtr;
-		return link;
-	}
-	return 0;
+const struct UrdfLink* PhysXURDFImporter::getUrdfLink(int urdfLinkIndex) const {
+  UrdfLink* const* linkPtr =
+      m_data->m_urdfParser.getModel().m_links.getAtIndex(urdfLinkIndex);
+  btAssert(linkPtr);
+  if (linkPtr) {
+    const UrdfLink* link = *linkPtr;
+    return link;
+  }
+  return 0;
 }
 
-const struct UrdfModel* PhysXURDFImporter::getUrdfModel() const
-{
-	return &m_data->m_urdfParser.getModel();
+const struct UrdfModel* PhysXURDFImporter::getUrdfModel() const {
+  return &m_data->m_urdfParser.getModel();
 }
 
-
-int PhysXURDFImporter::getUrdfFromCollisionShape(const btCollisionShape* collisionShape, UrdfCollision& collision) const
-{
-	UrdfCollision* col = m_data->m_bulletCollisionShape2UrdfCollision.find(collisionShape);
-	if (col)
-	{
-		collision = *col;
-		return 1;
-	}
-	return 0;
+int PhysXURDFImporter::getUrdfFromCollisionShape(
+    const btCollisionShape* collisionShape, UrdfCollision& collision) const {
+  UrdfCollision* col =
+      m_data->m_bulletCollisionShape2UrdfCollision.find(collisionShape);
+  if (col) {
+    collision = *col;
+    return 1;
+  }
+  return 0;
 }
 
 #if 0
@@ -1253,143 +1202,131 @@ int PhysXURDFImporter::convertLinkVisualShapes(int linkIndex, const char* pathPr
 	return graphicsIndex;
 }
 #endif
-bool PhysXURDFImporter::getLinkColor(int linkIndex, btVector4& colorRGBA) const
-{
-	const UrdfMaterialColor* matColPtr = m_data->m_linkColors[linkIndex];
-	if (matColPtr)
-	{
-		colorRGBA = matColPtr->m_rgbaColor;
-		return true;
-	}
-	return false;
+bool PhysXURDFImporter::getLinkColor(int linkIndex,
+                                     btVector4& colorRGBA) const {
+  const UrdfMaterialColor* matColPtr = m_data->m_linkColors[linkIndex];
+  if (matColPtr) {
+    colorRGBA = matColPtr->m_rgbaColor;
+    return true;
+  }
+  return false;
 }
 
-bool PhysXURDFImporter::getLinkColor2(int linkIndex, UrdfMaterialColor& matCol) const
-{
-	UrdfMaterialColor* matColPtr = m_data->m_linkColors[linkIndex];
-	if (matColPtr)
-	{
-		matCol = *matColPtr;
-		return true;
-	}
-	return false;
+bool PhysXURDFImporter::getLinkColor2(int linkIndex,
+                                      UrdfMaterialColor& matCol) const {
+  UrdfMaterialColor* matColPtr = m_data->m_linkColors[linkIndex];
+  if (matColPtr) {
+    matCol = *matColPtr;
+    return true;
+  }
+  return false;
 }
 
-void PhysXURDFImporter::setLinkColor2(int linkIndex, struct UrdfMaterialColor& matCol) const
-{
-	m_data->m_linkColors.insert(linkIndex, matCol);
+void PhysXURDFImporter::setLinkColor2(int linkIndex,
+                                      struct UrdfMaterialColor& matCol) const {
+  m_data->m_linkColors.insert(linkIndex, matCol);
 }
 
-bool PhysXURDFImporter::getLinkContactInfo(int urdflinkIndex, URDFLinkContactInfo& contactInfo) const
-{
-	UrdfLink* const* linkPtr = m_data->m_urdfParser.getModel().m_links.getAtIndex(urdflinkIndex);
-	if (linkPtr)
-	{
-		const UrdfLink* link = *linkPtr;
-		contactInfo = link->m_contactInfo;
-		return true;
-	}
-	return false;
+bool PhysXURDFImporter::getLinkContactInfo(
+    int urdflinkIndex, URDFLinkContactInfo& contactInfo) const {
+  UrdfLink* const* linkPtr =
+      m_data->m_urdfParser.getModel().m_links.getAtIndex(urdflinkIndex);
+  if (linkPtr) {
+    const UrdfLink* link = *linkPtr;
+    contactInfo = link->m_contactInfo;
+    return true;
+  }
+  return false;
 }
 
-bool PhysXURDFImporter::getLinkAudioSource(int linkIndex, SDFAudioSource& audioSource) const
-{
-	UrdfLink* const* linkPtr = m_data->m_urdfParser.getModel().m_links.getAtIndex(linkIndex);
-	if (linkPtr)
-	{
-		const UrdfLink* link = *linkPtr;
-		if (link->m_audioSource.m_flags & SDFAudioSource::SDFAudioSourceValid)
-		{
-			audioSource = link->m_audioSource;
-			return true;
-		}
-	}
-	return false;
+bool PhysXURDFImporter::getLinkAudioSource(int linkIndex,
+                                           SDFAudioSource& audioSource) const {
+  UrdfLink* const* linkPtr =
+      m_data->m_urdfParser.getModel().m_links.getAtIndex(linkIndex);
+  if (linkPtr) {
+    const UrdfLink* link = *linkPtr;
+    if (link->m_audioSource.m_flags & SDFAudioSource::SDFAudioSourceValid) {
+      audioSource = link->m_audioSource;
+      return true;
+    }
+  }
+  return false;
 }
 
-void PhysXURDFImporter::setEnableTinyRenderer(bool enable)
-{
-	m_data->m_enableTinyRenderer = enable;
+void PhysXURDFImporter::setEnableTinyRenderer(bool enable) {
+  m_data->m_enableTinyRenderer = enable;
 }
-
-
 
 int PhysXURDFImporter::convertLinkVisualShapes3(
-	int linkIndex, const char* pathPrefix, const btTransform& localInertiaFrame,
-	const UrdfLink* linkPtr, const UrdfModel* model,
-	int collisionObjectUniqueId, int bodyUniqueId, struct  CommonFileIOInterface* fileIO) const
-{
-	return 0;
+    int linkIndex, const char* pathPrefix, const btTransform& localInertiaFrame,
+    const UrdfLink* linkPtr, const UrdfModel* model,
+    int collisionObjectUniqueId, int bodyUniqueId,
+    struct CommonFileIOInterface* fileIO) const {
+  return 0;
 }
 
-void PhysXURDFImporter::convertLinkVisualShapes2(int linkIndex, int urdfIndex, const char* pathPrefix, const btTransform& localInertiaFrame, class btCollisionObject* colObj, int bodyUniqueId) const
-{
-	if (m_data->m_enableTinyRenderer && m_data->m_customVisualShapesConverter)
-	{
-		const UrdfModel& model = m_data->m_urdfParser.getModel();
-		UrdfLink* const* linkPtr = model.m_links.getAtIndex(urdfIndex);
-		if (linkPtr)
-		{
-			m_data->m_customVisualShapesConverter->setFlags(m_data->m_flags);
-			m_data->m_customVisualShapesConverter->convertVisualShapes(linkIndex, pathPrefix, localInertiaFrame, *linkPtr, &model, 0, bodyUniqueId, m_data->m_fileIO);
-		}
-	}
+void PhysXURDFImporter::convertLinkVisualShapes2(
+    int linkIndex, int urdfIndex, const char* pathPrefix,
+    const btTransform& localInertiaFrame, class btCollisionObject* colObj,
+    int bodyUniqueId) const {
+  if (m_data->m_enableTinyRenderer && m_data->m_customVisualShapesConverter) {
+    const UrdfModel& model = m_data->m_urdfParser.getModel();
+    UrdfLink* const* linkPtr = model.m_links.getAtIndex(urdfIndex);
+    if (linkPtr) {
+      m_data->m_customVisualShapesConverter->setFlags(m_data->m_flags);
+      m_data->m_customVisualShapesConverter->convertVisualShapes(
+          linkIndex, pathPrefix, localInertiaFrame, *linkPtr, &model, 0,
+          bodyUniqueId, m_data->m_fileIO);
+    }
+  }
 }
 
-int PhysXURDFImporter::getNumAllocatedCollisionShapes() const
-{
-	return m_data->m_allocatedCollisionShapes.size();
+int PhysXURDFImporter::getNumAllocatedCollisionShapes() const {
+  return m_data->m_allocatedCollisionShapes.size();
 }
 
-btCollisionShape* PhysXURDFImporter::getAllocatedCollisionShape(int index)
-{
-	return m_data->m_allocatedCollisionShapes[index];
+btCollisionShape* PhysXURDFImporter::getAllocatedCollisionShape(int index) {
+  return m_data->m_allocatedCollisionShapes[index];
 }
 
-int PhysXURDFImporter::getNumAllocatedMeshInterfaces() const
-{
-	return 0;// m_data->m_allocatedMeshInterfaces.size();
+int PhysXURDFImporter::getNumAllocatedMeshInterfaces() const {
+  return 0;  // m_data->m_allocatedMeshInterfaces.size();
 }
 
-btStridingMeshInterface* PhysXURDFImporter::getAllocatedMeshInterface(int index)
-{
-	return 0;// m_data->m_allocatedMeshInterfaces[index];
+btStridingMeshInterface* PhysXURDFImporter::getAllocatedMeshInterface(
+    int index) {
+  return 0;  // m_data->m_allocatedMeshInterfaces[index];
 }
 
-int PhysXURDFImporter::getNumAllocatedTextures() const
-{
-	return m_data->m_allocatedTextures.size();
+int PhysXURDFImporter::getNumAllocatedTextures() const {
+  return m_data->m_allocatedTextures.size();
 }
 
-int PhysXURDFImporter::getAllocatedTexture(int index) const
-{
-	return m_data->m_allocatedTextures[index];
+int PhysXURDFImporter::getAllocatedTexture(int index) const {
+  return m_data->m_allocatedTextures[index];
 }
 
-int PhysXURDFImporter::getCollisionGroupAndMask(int linkIndex, int& colGroup, int& colMask) const
-{
-	int result = 0;
-	UrdfLink* const* linkPtr = m_data->m_urdfParser.getModel().m_links.getAtIndex(linkIndex);
-	btAssert(linkPtr);
-	if (linkPtr)
-	{
-		UrdfLink* link = *linkPtr;
-		for (int v = 0; v < link->m_collisionArray.size(); v++)
-		{
-			const UrdfCollision& col = link->m_collisionArray[v];
-			if (col.m_flags & URDF_HAS_COLLISION_GROUP)
-			{
-				colGroup = col.m_collisionGroup;
-				result |= URDF_HAS_COLLISION_GROUP;
-			}
-			if (col.m_flags & URDF_HAS_COLLISION_MASK)
-			{
-				colMask = col.m_collisionMask;
-				result |= URDF_HAS_COLLISION_MASK;
-			}
-		}
-	}
-	return result;
+int PhysXURDFImporter::getCollisionGroupAndMask(int linkIndex, int& colGroup,
+                                                int& colMask) const {
+  int result = 0;
+  UrdfLink* const* linkPtr =
+      m_data->m_urdfParser.getModel().m_links.getAtIndex(linkIndex);
+  btAssert(linkPtr);
+  if (linkPtr) {
+    UrdfLink* link = *linkPtr;
+    for (int v = 0; v < link->m_collisionArray.size(); v++) {
+      const UrdfCollision& col = link->m_collisionArray[v];
+      if (col.m_flags & URDF_HAS_COLLISION_GROUP) {
+        colGroup = col.m_collisionGroup;
+        result |= URDF_HAS_COLLISION_GROUP;
+      }
+      if (col.m_flags & URDF_HAS_COLLISION_MASK) {
+        colMask = col.m_collisionMask;
+        result |= URDF_HAS_COLLISION_MASK;
+      }
+    }
+  }
+  return result;
 }
 
 #if 0

@@ -3,23 +3,18 @@
 
 #include "GpuRigidBodyDemo.h"
 
-class GpuSphereScene : public GpuRigidBodyDemo
-{
-public:
-	GpuSphereScene() {}
-	virtual ~GpuSphereScene() {}
-	virtual const char* getName()
-	{
-		return "BoxOnSphere";
-	}
+class GpuSphereScene : public GpuRigidBodyDemo {
+ public:
+  GpuSphereScene() {}
+  virtual ~GpuSphereScene() {}
+  virtual const char* getName() { return "BoxOnSphere"; }
 
-	static GpuDemo* MyCreateFunc()
-	{
-		GpuDemo* demo = new GpuSphereScene;
-		return demo;
-	}
+  static GpuDemo* MyCreateFunc() {
+    GpuDemo* demo = new GpuSphereScene;
+    return demo;
+  }
 
-	virtual void setupScene(const ConstructionInfo& ci);
+  virtual void setupScene(const ConstructionInfo& ci);
 };
 
-#endif  //GPU_SPHERE_SCENE_H
+#endif  // GPU_SPHERE_SCENE_H

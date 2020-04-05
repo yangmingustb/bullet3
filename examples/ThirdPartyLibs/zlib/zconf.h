@@ -225,7 +225,8 @@
 #endif
 
 /* Some Mac compilers merge all .h files incorrectly: */
-#if defined(__MWERKS__) || defined(applec) || defined(THINK_C) || defined(__SC__)
+#if defined(__MWERKS__) || defined(applec) || defined(THINK_C) || \
+    defined(__SC__)
 #define NO_DUMMY_DECL
 #endif
 
@@ -318,10 +319,10 @@
 #endif
 #endif
 #endif /* ZLIB_DLL */
-/* If building or using zlib with the WINAPI/WINAPIV calling convention,
-    * define ZLIB_WINAPI.
-    * Caution: the standard ZLIB1.DLL is NOT compiled using ZLIB_WINAPI.
-    */
+       /* If building or using zlib with the WINAPI/WINAPIV calling convention,
+           * define ZLIB_WINAPI.
+           * Caution: the standard ZLIB1.DLL is NOT compiled using ZLIB_WINAPI.
+           */
 #ifdef ZLIB_WINAPI
 #ifdef FAR
 #undef FAR
@@ -467,7 +468,8 @@ typedef unsigned long z_crc_t;
 #define Z_LARGE64
 #endif
 
-#if defined(_FILE_OFFSET_BITS) && _FILE_OFFSET_BITS - 0 == 64 && defined(Z_LFS64)
+#if defined(_FILE_OFFSET_BITS) && _FILE_OFFSET_BITS - 0 == 64 && \
+    defined(Z_LFS64)
 #define Z_WANT64
 #endif
 

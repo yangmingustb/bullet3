@@ -3,16 +3,15 @@
 
 #include "SharedMemoryInterface.h"
 
-class PosixSharedMemory : public SharedMemoryInterface
-{
-	struct PosixSharedMemoryInteralData* m_internalData;
+class PosixSharedMemory : public SharedMemoryInterface {
+  struct PosixSharedMemoryInteralData* m_internalData;
 
-public:
-	PosixSharedMemory();
-	virtual ~PosixSharedMemory();
+ public:
+  PosixSharedMemory();
+  virtual ~PosixSharedMemory();
 
-	virtual void* allocateSharedMemory(int key, int size, bool allowCreation);
-	virtual void releaseSharedMemory(int key, int size);
+  virtual void* allocateSharedMemory(int key, int size, bool allowCreation);
+  virtual void releaseSharedMemory(int key, int size);
 };
 
 #endif  //

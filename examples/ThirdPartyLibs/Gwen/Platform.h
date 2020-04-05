@@ -1,20 +1,18 @@
 /*
-	GWEN
-	Copyright (c) 2010 Facepunch Studios
-	See license in Gwen.h
+        GWEN
+        Copyright (c) 2010 Facepunch Studios
+        See license in Gwen.h
 */
 
 #pragma once
 #ifndef GWEN_PLATFORM_H
 #define GWEN_PLATFORM_H
 
-#include "Gwen/Structures.h"
 #include "Gwen/Events.h"
+#include "Gwen/Structures.h"
 
-namespace Gwen
-{
-namespace Platform
-{
+namespace Gwen {
+namespace Platform {
 //
 // Set the system cursor to iCursor
 // Cursors are defined in Structures.h
@@ -35,8 +33,14 @@ float GWEN_EXPORT GetTimeInSeconds();
 //
 // System Dialogs ( Can return false if unhandled )
 //
-bool GWEN_EXPORT FileOpen(const String& Name, const String& StartPath, const String& Extension, Gwen::Event::Handler* pHandler, Event::Handler::FunctionStr fnCallback);
-bool GWEN_EXPORT FileSave(const String& Name, const String& StartPath, const String& Extension, Gwen::Event::Handler* pHandler, Event::Handler::FunctionStr fnCallback);
+bool GWEN_EXPORT FileOpen(const String& Name, const String& StartPath,
+                          const String& Extension,
+                          Gwen::Event::Handler* pHandler,
+                          Event::Handler::FunctionStr fnCallback);
+bool GWEN_EXPORT FileSave(const String& Name, const String& StartPath,
+                          const String& Extension,
+                          Gwen::Event::Handler* pHandler,
+                          Event::Handler::FunctionStr fnCallback);
 }  // namespace Platform
 
 }  // namespace Gwen

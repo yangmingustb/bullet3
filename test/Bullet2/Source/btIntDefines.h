@@ -16,4 +16,4 @@ typedef unsigned int uint32_t;
 typedef unsigned long long int uint64_t;
 #endif
 
-#endif  //BT_INT_DEFINES_H
+#endif  // BT_INT_DEFINES_H

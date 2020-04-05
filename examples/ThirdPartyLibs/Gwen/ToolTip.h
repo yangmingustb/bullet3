@@ -1,7 +1,7 @@
 /*
-	GWEN
-	Copyright (c) 2010 Facepunch Studios
-	See license in Gwen.h
+        GWEN
+        Copyright (c) 2010 Facepunch Studios
+        See license in Gwen.h
 */
 
 #pragma once
@@ -15,8 +15,7 @@
 using namespace Gwen;
 using namespace Gwen::Controls;
 
-namespace ToolTip
-{
+namespace ToolTip {
 GWEN_EXPORT void Enable(Controls::Base* pControl);
 GWEN_EXPORT void Disable(Controls::Base* pControl);
 

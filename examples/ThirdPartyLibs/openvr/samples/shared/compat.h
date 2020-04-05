@@ -1,15 +1,15 @@
 #ifndef OPENVR_SAMPLES_SHARED_COMPAT_H_
 #define OPENVR_SAMPLES_SHARED_COMPAT_H_
 
+#include <cassert>
 #include <cstdio>
 #include <cstring>
-#include <cassert>
 
 // Handle non standard code.
 #ifndef _WIN32
 
-#include <cstdbool>
 #include <unistd.h>
+#include <cstdbool>
 
 #define sprintf_s snprintf
 #define vsprintf_s sprintf

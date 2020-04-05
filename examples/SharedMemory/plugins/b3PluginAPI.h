@@ -20,20 +20,26 @@
 #endif
 
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif
-	/* Plugin API */
-	typedef B3_API_ENTRY int(B3_API_CALL* PFN_INIT)(struct b3PluginContext* context);
-	typedef B3_API_ENTRY void(B3_API_CALL* PFN_EXIT)(struct b3PluginContext* context);
-	typedef B3_API_ENTRY int(B3_API_CALL* PFN_EXECUTE)(struct b3PluginContext* context, const struct b3PluginArguments* arguments);
-	typedef B3_API_ENTRY int(B3_API_CALL* PFN_TICK)(struct b3PluginContext* context);
+/* Plugin API */
+typedef B3_API_ENTRY int(B3_API_CALL* PFN_INIT)(
+    struct b3PluginContext* context);
+typedef B3_API_ENTRY void(B3_API_CALL* PFN_EXIT)(
+    struct b3PluginContext* context);
+typedef B3_API_ENTRY int(B3_API_CALL* PFN_EXECUTE)(
+    struct b3PluginContext* context, const struct b3PluginArguments* arguments);
+typedef B3_API_ENTRY int(B3_API_CALL* PFN_TICK)(
+    struct b3PluginContext* context);
 
-	typedef B3_API_ENTRY struct UrdfRenderingInterface*(B3_API_CALL* PFN_GET_RENDER_INTERFACE)(struct b3PluginContext* context);
-	typedef B3_API_ENTRY struct b3PluginCollisionInterface*(B3_API_CALL* PFN_GET_COLLISION_INTERFACE)(struct b3PluginContext* context);
-	typedef B3_API_ENTRY struct CommonFileIOInterface*(B3_API_CALL* PFN_GET_FILEIO_INTERFACE)(struct b3PluginContext* context);
+typedef B3_API_ENTRY struct UrdfRenderingInterface*(
+    B3_API_CALL* PFN_GET_RENDER_INTERFACE)(struct b3PluginContext* context);
+typedef B3_API_ENTRY struct b3PluginCollisionInterface*(
+    B3_API_CALL* PFN_GET_COLLISION_INTERFACE)(struct b3PluginContext* context);
+typedef B3_API_ENTRY struct CommonFileIOInterface*(
+    B3_API_CALL* PFN_GET_FILEIO_INTERFACE)(struct b3PluginContext* context);
 #ifdef __cplusplus
 }
 #endif
 
-#endif  //B3_PLUGIN_API_H
+#endif  // B3_PLUGIN_API_H

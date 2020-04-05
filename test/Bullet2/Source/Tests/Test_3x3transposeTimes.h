@@ -9,11 +9,10 @@
 #define BulletTest_Test_3x3transposeTimes_h
 
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif
 
-	int Test_3x3transposeTimes(void);
+int Test_3x3transposeTimes(void);
 
 #ifdef __cplusplus
 }

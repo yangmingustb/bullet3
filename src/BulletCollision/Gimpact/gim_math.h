@@ -27,7 +27,8 @@ email: projectileman@yahoo.com
  This library is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the files
- GIMPACT-LICENSE-LGPL.TXT, GIMPACT-LICENSE-ZLIB.TXT and GIMPACT-LICENSE-BSD.TXT for more details.
+ GIMPACT-LICENSE-LGPL.TXT, GIMPACT-LICENSE-ZLIB.TXT and GIMPACT-LICENSE-BSD.TXT
+for more details.
 
 -----------------------------------------------------------------------------
 */
@@ -45,9 +46,9 @@ email: projectileman@yahoo.com
 
 #define G_PI 3.14159265358979f
 #define G_HALF_PI 1.5707963f
-//267948966
+// 267948966
 #define G_TWO_PI 6.28318530f
-//71795864
+// 71795864
 #define G_ROOT3 1.73205f
 #define G_ROOT2 1.41421f
 #define G_UINT_INFINITY 0xffffffff  //!< A very very high value
@@ -55,16 +56,15 @@ email: projectileman@yahoo.com
 #define G_SIGN_BITMASK 0x80000000
 #define G_EPSILON SIMD_EPSILON
 
-enum GIM_SCALAR_TYPES
-{
-	G_STYPE_REAL = 0,
-	G_STYPE_REAL2,
-	G_STYPE_SHORT,
-	G_STYPE_USHORT,
-	G_STYPE_INT,
-	G_STYPE_UINT,
-	G_STYPE_INT64,
-	G_STYPE_UINT64
+enum GIM_SCALAR_TYPES {
+  G_STYPE_REAL = 0,
+  G_STYPE_REAL2,
+  G_STYPE_SHORT,
+  G_STYPE_USHORT,
+  G_STYPE_INT,
+  G_STYPE_UINT,
+  G_STYPE_INT64,
+  G_STYPE_UINT64
 };
 
 #define G_DEGTORAD(X) ((X)*3.1415926f / 180.0f)
@@ -96,53 +96,50 @@ enum GIM_SCALAR_TYPES
 
 #define GIM_NEAR_EQUAL(v1, v2) GIM_IS_ZERO((v1 - v2))
 
-///returns a clamped number
-#define GIM_CLAMP(number, minval, maxval) (number < minval ? minval : (number > maxval ? maxval : number))
+/// returns a clamped number
+#define GIM_CLAMP(number, minval, maxval) \
+  (number < minval ? minval : (number > maxval ? maxval : number))
 
 #define GIM_GREATER(x, y) btFabs(x) > (y)
 
-///Swap numbers
+/// Swap numbers
 #define GIM_SWAP_NUMBERS(a, b) \
-	{                          \
-		a = a + b;             \
-		b = a - b;             \
-		a = a - b;             \
-	}
+  {                            \
+    a = a + b;                 \
+    b = a - b;                 \
+    a = a - b;                 \
+  }
 
-#define GIM_INV_SQRT(va, isva)                         \
-	{                                                  \
-		if (va <= 0.0000001f)                          \
-		{                                              \
-			isva = G_REAL_INFINITY;                    \
-		}                                              \
-		else                                           \
-		{                                              \
-			GREAL _x = va * 0.5f;                      \
-			GUINT _y = 0x5f3759df - (GIM_IR(va) >> 1); \
-			isva = GIM_FR(_y);                         \
-			isva = isva * (1.5f - (_x * isva * isva)); \
-		}                                              \
-	}
+#define GIM_INV_SQRT(va, isva)                   \
+  {                                              \
+    if (va <= 0.0000001f) {                      \
+      isva = G_REAL_INFINITY;                    \
+    } else {                                     \
+      GREAL _x = va * 0.5f;                      \
+      GUINT _y = 0x5f3759df - (GIM_IR(va) >> 1); \
+      isva = GIM_FR(_y);                         \
+      isva = isva * (1.5f - (_x * isva * isva)); \
+    }                                            \
+  }
 
-#define GIM_SQRT(va, sva)      \
-	{                          \
-		GIM_INV_SQRT(va, sva); \
-		sva = 1.0f / sva;      \
-	}
+#define GIM_SQRT(va, sva)  \
+  {                        \
+    GIM_INV_SQRT(va, sva); \
+    sva = 1.0f / sva;      \
+  }
 
-//! Computes 1.0f / sqrtf(x). Comes from Quake3. See http://www.magic-software.com/3DGEDInvSqrt.html
-inline GREAL gim_inv_sqrt(GREAL f)
-{
-	GREAL r;
-	GIM_INV_SQRT(f, r);
-	return r;
+//! Computes 1.0f / sqrtf(x). Comes from Quake3. See
+//! http://www.magic-software.com/3DGEDInvSqrt.html
+inline GREAL gim_inv_sqrt(GREAL f) {
+  GREAL r;
+  GIM_INV_SQRT(f, r);
+  return r;
 }
 
-inline GREAL gim_sqrt(GREAL f)
-{
-	GREAL r;
-	GIM_SQRT(f, r);
-	return r;
+inline GREAL gim_sqrt(GREAL f) {
+  GREAL r;
+  GIM_SQRT(f, r);
+  return r;
 }
 
 #endif  // GIM_MATH_H_INCLUDED

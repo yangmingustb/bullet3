@@ -1,7 +1,7 @@
 /*
-	GWEN
-	Copyright (c) 2010 Facepunch Studios
-	See license in Gwen.h
+        GWEN
+        Copyright (c) 2010 Facepunch Studios
+        See license in Gwen.h
 */
 
 #pragma once
@@ -12,32 +12,33 @@
 #include "Gwen/Controls/Label.h"
 #include "Gwen/Controls/RadioButton.h"
 
-namespace Gwen
-{
-namespace Controls
-{
-class GWEN_EXPORT RadioButtonController : public Base
-{
-public:
-	GWEN_CONTROL(RadioButtonController, Base);
+namespace Gwen {
+namespace Controls {
+class GWEN_EXPORT RadioButtonController : public Base {
+ public:
+  GWEN_CONTROL(RadioButtonController, Base);
 
-	virtual void Render(Skin::Base* /*skin*/){};
-	virtual void OnRadioClicked(Base* pFromPanel);
+  virtual void Render(Skin::Base* /*skin*/){};
+  virtual void OnRadioClicked(Base* pFromPanel);
 
-	virtual void OnChange();
+  virtual void OnChange();
 
-	virtual LabeledRadioButton* AddOption(const Gwen::String& strText, const Gwen::String& strOptionName = "");
-	virtual LabeledRadioButton* AddOption(const Gwen::UnicodeString& strText, const Gwen::String& strOptionName = "");
+  virtual LabeledRadioButton* AddOption(const Gwen::String& strText,
+                                        const Gwen::String& strOptionName = "");
+  virtual LabeledRadioButton* AddOption(const Gwen::UnicodeString& strText,
+                                        const Gwen::String& strOptionName = "");
 
-	virtual LabeledRadioButton* GetSelected() { return m_Selected; }
+  virtual LabeledRadioButton* GetSelected() { return m_Selected; }
 
-	virtual String GetSelectedName() { return m_Selected->GetName(); }
-	virtual UnicodeString GetSelectedLabel() { return m_Selected->GetLabel()->GetText(); }
+  virtual String GetSelectedName() { return m_Selected->GetName(); }
+  virtual UnicodeString GetSelectedLabel() {
+    return m_Selected->GetLabel()->GetText();
+  }
 
-	Event::Caller onSelectionChange;
+  Event::Caller onSelectionChange;
 
-private:
-	LabeledRadioButton* m_Selected;
+ private:
+  LabeledRadioButton* m_Selected;
 };
 }  // namespace Controls
 }  // namespace Gwen

@@ -9,7 +9,7 @@
 #else  //(USE_SYSTEM_VECTORMATH)
 #if defined(BT_USE_SSE)
 #include "sse/vectormath_aos.h"
-#else  //all other platforms
+#else  // all other platforms
 #if defined(BT_USE_NEON)
 #include "neon/vectormath_aos.h"
 #else

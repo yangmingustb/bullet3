@@ -9,11 +9,10 @@
 #define BulletTest_Test_qtnorm_h
 
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif
 
-	int Test_qtnorm(void);
+int Test_qtnorm(void);
 
 #ifdef __cplusplus
 }

@@ -3,16 +3,15 @@
 
 #include "SpringNetwork.h"
 
-class Cloth : public SpringNetwork
-{
-public:
-	int w, h;
+class Cloth : public SpringNetwork {
+ public:
+  int w, h;
 
-	float3 color;  // for debug rendering
-	Cloth(const char* _name, int _n);
-	~Cloth();
+  float3 color;  // for debug rendering
+  Cloth(const char* _name, int _n);
+  ~Cloth();
 };
 
 Cloth* ClothCreate(int w, int h, float size);
 
-#endif  //STAN_CLOTH_H
+#endif  // STAN_CLOTH_H

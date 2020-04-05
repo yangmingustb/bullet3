@@ -22,9 +22,8 @@ namespace internal {
 
     This implementation works on both scalars and packets.
 */
-template<typename T>
-T generic_fast_tanh_float(const T& a_x)
-{
+template <typename T>
+T generic_fast_tanh_float(const T& a_x) {
   // Clamp the inputs to the range [-9, 9] since anything outside
   // this range is +/-1.0f in single-precision.
   const T plus_9 = pset1<T>(9.f);
@@ -66,8 +65,8 @@ T generic_fast_tanh_float(const T& a_x)
   return pdiv(p, q);
 }
 
-} // end namespace internal
+}  // end namespace internal
 
-} // end namespace Eigen
+}  // end namespace Eigen
 
-#endif // EIGEN_MATHFUNCTIONSIMPL_H
+#endif  // EIGEN_MATHFUNCTIONSIMPL_H

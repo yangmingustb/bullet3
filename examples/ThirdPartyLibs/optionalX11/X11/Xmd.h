@@ -57,13 +57,10 @@ SOFTWARE.
 #include <sys/isa_defs.h> /* Solaris: defines _LP64 if necessary */
 #endif
 
-#if defined(_LP64) || defined(__LP64__) ||    \
-	defined(__alpha) || defined(__alpha__) || \
-	defined(__ia64__) || defined(ia64) ||     \
-	defined(__sparc64__) ||                   \
-	defined(__s390x__) ||                     \
-	defined(__amd64__) || defined(amd64) ||   \
-	defined(__powerpc64__)
+#if defined(_LP64) || defined(__LP64__) || defined(__alpha) ||          \
+    defined(__alpha__) || defined(__ia64__) || defined(ia64) ||         \
+    defined(__sparc64__) || defined(__s390x__) || defined(__amd64__) || \
+    defined(amd64) || defined(__powerpc64__)
 #if !defined(__ILP32__) /* amd64-x32 is 32bit */
 #define LONG64          /* 32/64-bit architecture */
 #endif                  /* !__ILP32__ */
@@ -147,9 +144,12 @@ typedef CARD8 BOOL;
  * definitions for sign-extending bitfields on 64-bit architectures
  */
 #if defined(WORD64) && defined(UNSIGNEDBITFIELDS)
-#define cvtINT8toInt(val) (((val)&0x00000080) ? ((val) | 0xffffffffffffff00) : (val))
-#define cvtINT16toInt(val) (((val)&0x00008000) ? ((val) | 0xffffffffffff0000) : (val))
-#define cvtINT32toInt(val) (((val)&0x80000000) ? ((val) | 0xffffffff00000000) : (val))
+#define cvtINT8toInt(val) \
+  (((val)&0x00000080) ? ((val) | 0xffffffffffffff00) : (val))
+#define cvtINT16toInt(val) \
+  (((val)&0x00008000) ? ((val) | 0xffffffffffff0000) : (val))
+#define cvtINT32toInt(val) \
+  (((val)&0x80000000) ? ((val) | 0xffffffff00000000) : (val))
 #define cvtINT8toShort(val) cvtINT8toInt(val)
 #define cvtINT16toShort(val) cvtINT16toInt(val)
 #define cvtINT32toShort(val) cvtINT32toInt(val)

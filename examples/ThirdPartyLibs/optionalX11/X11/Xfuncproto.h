@@ -68,9 +68,7 @@ in this Software without prior written authorization from The Open Group.
 
 #ifndef _XFUNCPROTOBEGIN
 #if defined(__cplusplus) || defined(c_plusplus) /* for C++ V2.0 */
-#define _XFUNCPROTOBEGIN \
-	extern "C"           \
-	{ /* do not leave open across includes */
+#define _XFUNCPROTOBEGIN extern "C" { /* do not leave open across includes */
 #define _XFUNCPROTOEND }
 #else
 #define _XFUNCPROTOBEGIN
@@ -86,7 +84,8 @@ in this Software without prior written authorization from The Open Group.
 #endif /* GNUC >= 4 */
 
 /* Added in X11R6.9, so available in any version of modular xproto */
-#if defined(__GNUC__) && (__GNUC__ >= 4) && !defined(__CYGWIN__) && !defined(__MINGW32__)
+#if defined(__GNUC__) && (__GNUC__ >= 4) && !defined(__CYGWIN__) && \
+    !defined(__MINGW32__)
 #define _X_EXPORT __attribute__((visibility("default")))
 #define _X_HIDDEN __attribute__((visibility("hidden")))
 #define _X_INTERNAL __attribute__((visibility("internal")))
@@ -117,7 +116,8 @@ in this Software without prior written authorization from The Open Group.
 #endif
 
 /* requires xproto >= 7.0.17 */
-#if (defined(__GNUC__) && ((__GNUC__ * 100 + __GNUC_MINOR__) >= 205)) || (defined(__SUNPRO_C) && (__SUNPRO_C >= 0x590))
+#if (defined(__GNUC__) && ((__GNUC__ * 100 + __GNUC_MINOR__) >= 205)) || \
+    (defined(__SUNPRO_C) && (__SUNPRO_C >= 0x590))
 #define _X_NORETURN __attribute((noreturn))
 #else
 #define _X_NORETURN
@@ -149,11 +149,13 @@ in this Software without prior written authorization from The Open Group.
 /* C99 keyword "inline" or equivalent extensions in pre-C99 compilers */
 /* requires xproto >= 7.0.9
    (introduced in 7.0.8 but didn't support all compilers until 7.0.9) */
-#if defined(inline) /* assume autoconf set it correctly */ ||                     \
-	(defined(__STDC_VERSION__) && (__STDC_VERSION__ - 0 >= 199901L)) /* C99 */ || \
-	(defined(__SUNPRO_C) && (__SUNPRO_C >= 0x550))
+#if defined(inline) /* assume autoconf set it correctly */ || \
+    (defined(__STDC_VERSION__) &&                             \
+     (__STDC_VERSION__ - 0 >= 199901L)) /* C99 */ ||          \
+    (defined(__SUNPRO_C) && (__SUNPRO_C >= 0x550))
 #define _X_INLINE inline
-#elif defined(__GNUC__) && !defined(__STRICT_ANSI__) /* gcc w/C89+extensions */
+#elif defined(__GNUC__) && !defined(__STRICT_ANSI__) /* gcc w/C89+extensions \
+                                                        */
 #define _X_INLINE __inline__
 #else
 #define _X_INLINE
@@ -163,10 +165,11 @@ in this Software without prior written authorization from The Open Group.
 /* requires xproto >= 7.0.21 */
 #ifndef _X_RESTRICT_KYWD
 #if defined(restrict) /* assume autoconf set it correctly */ ||               \
-	(defined(__STDC_VERSION__) && (__STDC_VERSION__ - 0 >= 199901L) /* C99 */ \
-	 && !defined(__cplusplus))                                      /* Workaround g++ issue on Solaris */
+    (defined(__STDC_VERSION__) && (__STDC_VERSION__ - 0 >= 199901L) /* C99 */ \
+     && !defined(__cplusplus)) /* Workaround g++ issue on Solaris */
 #define _X_RESTRICT_KYWD restrict
-#elif defined(__GNUC__) && !defined(__STRICT_ANSI__) /* gcc w/C89+extensions */
+#elif defined(__GNUC__) && !defined(__STRICT_ANSI__) /* gcc w/C89+extensions \
+                                                        */
 #define _X_RESTRICT_KYWD __restrict__
 #else
 #define _X_RESTRICT_KYWD

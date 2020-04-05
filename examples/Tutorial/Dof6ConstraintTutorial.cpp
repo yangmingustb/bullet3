@@ -1,12 +1,12 @@
 #include "Dof6ConstraintTutorial.h"
 
-#include "btBulletDynamicsCommon.h"
+#include "../RenderingExamples/TimeSeriesCanvas.h"
 #include "BulletDynamics/ConstraintSolver/btNNCGConstraintSolver.h"
+#include "BulletDynamics/MLCPSolvers/btDantzigSolver.h"
+#include "BulletDynamics/MLCPSolvers/btLemkeSolver.h"
 #include "BulletDynamics/MLCPSolvers/btMLCPSolver.h"
 #include "BulletDynamics/MLCPSolvers/btSolveProjectedGaussSeidel.h"
-#include "BulletDynamics/MLCPSolvers/btLemkeSolver.h"
-#include "BulletDynamics/MLCPSolvers/btDantzigSolver.h"
-#include "../RenderingExamples/TimeSeriesCanvas.h"
+#include "btBulletDynamicsCommon.h"
 
 #include "BulletDynamics/ConstraintSolver/btGeneric6DofSpring2Constraint.h"
 
@@ -24,7 +24,7 @@
 
 extern float g_additionalBodyMass;
 
-//comment this out to compare with original spring constraint
+// comment this out to compare with original spring constraint
 #define USE_6DOF2
 #ifdef USE_6DOF2
 #define CONSTRAINT_TYPE btGeneric6DofSpring2Constraint
@@ -36,167 +36,166 @@ extern float g_additionalBodyMass;
 
 #include "../CommonInterfaces/CommonRigidBodyBase.h"
 
-struct Dof6ConstraintTutorial : public CommonRigidBodyBase
-{
-	struct Dof6ConstraintTutorialInternalData* m_data;
+struct Dof6ConstraintTutorial : public CommonRigidBodyBase {
+  struct Dof6ConstraintTutorialInternalData* m_data;
 
-	Dof6ConstraintTutorial(struct GUIHelperInterface* helper);
-	virtual ~Dof6ConstraintTutorial();
-	virtual void initPhysics();
+  Dof6ConstraintTutorial(struct GUIHelperInterface* helper);
+  virtual ~Dof6ConstraintTutorial();
+  virtual void initPhysics();
 
-	virtual void stepSimulation(float deltaTime);
+  virtual void stepSimulation(float deltaTime);
 
-	void animate();
+  void animate();
 
-	virtual void resetCamera()
-	{
-		float dist = 5;
-		float pitch = -35;
-		float yaw = 722;
-		float targetPos[3] = {4, 2, -11};
-		m_guiHelper->resetCamera(dist, yaw, pitch, targetPos[0], targetPos[1], targetPos[2]);
-	}
+  virtual void resetCamera() {
+    float dist = 5;
+    float pitch = -35;
+    float yaw = 722;
+    float targetPos[3] = {4, 2, -11};
+    m_guiHelper->resetCamera(dist, yaw, pitch, targetPos[0], targetPos[1],
+                             targetPos[2]);
+  }
 };
 
-struct Dof6ConstraintTutorialInternalData
-{
-	btRigidBody* m_TranslateSpringBody;
-	btRigidBody* m_TranslateSpringBody2;
-	btRigidBody* m_RotateSpringBody;
-	btRigidBody* m_RotateSpringBody2;
-	btRigidBody* m_BouncingTranslateBody;
-	btRigidBody* m_MotorBody;
-	btRigidBody* m_ServoMotorBody;
-	btRigidBody* m_ChainLeftBody;
-	btRigidBody* m_ChainRightBody;
-	CONSTRAINT_TYPE* m_ServoMotorConstraint;
-	CONSTRAINT_TYPE* m_ChainLeftConstraint;
-	CONSTRAINT_TYPE* m_ChainRightConstraint;
+struct Dof6ConstraintTutorialInternalData {
+  btRigidBody* m_TranslateSpringBody;
+  btRigidBody* m_TranslateSpringBody2;
+  btRigidBody* m_RotateSpringBody;
+  btRigidBody* m_RotateSpringBody2;
+  btRigidBody* m_BouncingTranslateBody;
+  btRigidBody* m_MotorBody;
+  btRigidBody* m_ServoMotorBody;
+  btRigidBody* m_ChainLeftBody;
+  btRigidBody* m_ChainRightBody;
+  CONSTRAINT_TYPE* m_ServoMotorConstraint;
+  CONSTRAINT_TYPE* m_ChainLeftConstraint;
+  CONSTRAINT_TYPE* m_ChainRightConstraint;
 
-	TimeSeriesCanvas* m_timeSeriesCanvas;
+  TimeSeriesCanvas* m_timeSeriesCanvas;
 
-	float mDt;
+  float mDt;
 
-	unsigned int frameID;
-	Dof6ConstraintTutorialInternalData()
-		: mDt(1. / 60.), frameID(0)
-	{
-	}
+  unsigned int frameID;
+  Dof6ConstraintTutorialInternalData() : mDt(1. / 60.), frameID(0) {}
 };
 
-Dof6ConstraintTutorial::Dof6ConstraintTutorial(struct GUIHelperInterface* helper)
-	: CommonRigidBodyBase(helper)
-{
-	m_data = new Dof6ConstraintTutorialInternalData;
-	m_data->m_timeSeriesCanvas = new TimeSeriesCanvas(helper->get2dCanvasInterface(), 256, 256, "Position and Velocity");
-	m_data->m_timeSeriesCanvas->setupTimeSeries(20, 100, 0);
-	m_data->m_timeSeriesCanvas->addDataSource("X position (m)", 255, 0, 0);
-	m_data->m_timeSeriesCanvas->addDataSource("X velocity (m/s)", 0, 0, 255);
-	m_data->m_timeSeriesCanvas->addDataSource("dX/dt (m/s)", 0, 0, 0);
+Dof6ConstraintTutorial::Dof6ConstraintTutorial(
+    struct GUIHelperInterface* helper)
+    : CommonRigidBodyBase(helper) {
+  m_data = new Dof6ConstraintTutorialInternalData;
+  m_data->m_timeSeriesCanvas = new TimeSeriesCanvas(
+      helper->get2dCanvasInterface(), 256, 256, "Position and Velocity");
+  m_data->m_timeSeriesCanvas->setupTimeSeries(20, 100, 0);
+  m_data->m_timeSeriesCanvas->addDataSource("X position (m)", 255, 0, 0);
+  m_data->m_timeSeriesCanvas->addDataSource("X velocity (m/s)", 0, 0, 255);
+  m_data->m_timeSeriesCanvas->addDataSource("dX/dt (m/s)", 0, 0, 0);
 }
-Dof6ConstraintTutorial::~Dof6ConstraintTutorial()
-{
-	delete m_data->m_timeSeriesCanvas;
-	m_data->m_timeSeriesCanvas = 0;
-	exitPhysics();
-	delete m_data;
+Dof6ConstraintTutorial::~Dof6ConstraintTutorial() {
+  delete m_data->m_timeSeriesCanvas;
+  m_data->m_timeSeriesCanvas = 0;
+  exitPhysics();
+  delete m_data;
 }
-void Dof6ConstraintTutorial::initPhysics()
-{
-	// Setup the basic world
+void Dof6ConstraintTutorial::initPhysics() {
+  // Setup the basic world
 
-	m_guiHelper->setUpAxis(1);
+  m_guiHelper->setUpAxis(1);
 
-	m_collisionConfiguration = new btDefaultCollisionConfiguration();
-	m_dispatcher = new btCollisionDispatcher(m_collisionConfiguration);
-	btVector3 worldAabbMin(-10000, -10000, -10000);
-	btVector3 worldAabbMax(10000, 10000, 10000);
-	m_broadphase = new btAxisSweep3(worldAabbMin, worldAabbMax);
+  m_collisionConfiguration = new btDefaultCollisionConfiguration();
+  m_dispatcher = new btCollisionDispatcher(m_collisionConfiguration);
+  btVector3 worldAabbMin(-10000, -10000, -10000);
+  btVector3 worldAabbMax(10000, 10000, 10000);
+  m_broadphase = new btAxisSweep3(worldAabbMin, worldAabbMax);
 
-	/////// uncomment the corresponding line to test a solver.
-	//m_solver = new btSequentialImpulseConstraintSolver;
-	m_solver = new btNNCGConstraintSolver;
-	//m_solver = new btMLCPSolver(new btSolveProjectedGaussSeidel());
-	//m_solver = new btMLCPSolver(new btDantzigSolver());
-	//m_solver = new btMLCPSolver(new btLemkeSolver());
+  /////// uncomment the corresponding line to test a solver.
+  // m_solver = new btSequentialImpulseConstraintSolver;
+  m_solver = new btNNCGConstraintSolver;
+  // m_solver = new btMLCPSolver(new btSolveProjectedGaussSeidel());
+  // m_solver = new btMLCPSolver(new btDantzigSolver());
+  // m_solver = new btMLCPSolver(new btLemkeSolver());
 
-	m_dynamicsWorld = new btDiscreteDynamicsWorld(m_dispatcher, m_broadphase, m_solver, m_collisionConfiguration);
-	m_dynamicsWorld->getDispatchInfo().m_useContinuous = true;
-	m_guiHelper->createPhysicsDebugDrawer(m_dynamicsWorld);
+  m_dynamicsWorld = new btDiscreteDynamicsWorld(
+      m_dispatcher, m_broadphase, m_solver, m_collisionConfiguration);
+  m_dynamicsWorld->getDispatchInfo().m_useContinuous = true;
+  m_guiHelper->createPhysicsDebugDrawer(m_dynamicsWorld);
 
-	m_dynamicsWorld->setGravity(btVector3(0, 0, 0));
+  m_dynamicsWorld->setGravity(btVector3(0, 0, 0));
 
-	// Setup a big ground box
-	if (0)
-	{
-		btCollisionShape* groundShape = new btBoxShape(btVector3(btScalar(200.), btScalar(5.), btScalar(200.)));
-		btTransform groundTransform;
-		groundTransform.setIdentity();
-		groundTransform.setOrigin(btVector3(0, -10, 0));
+  // Setup a big ground box
+  if (0) {
+    btCollisionShape* groundShape =
+        new btBoxShape(btVector3(btScalar(200.), btScalar(5.), btScalar(200.)));
+    btTransform groundTransform;
+    groundTransform.setIdentity();
+    groundTransform.setOrigin(btVector3(0, -10, 0));
 #define CREATE_GROUND_COLLISION_OBJECT 1
 #ifdef CREATE_GROUND_COLLISION_OBJECT
-		btCollisionObject* fixedGround = new btCollisionObject();
-		fixedGround->setCollisionShape(groundShape);
-		fixedGround->setWorldTransform(groundTransform);
-		m_dynamicsWorld->addCollisionObject(fixedGround);
+    btCollisionObject* fixedGround = new btCollisionObject();
+    fixedGround->setCollisionShape(groundShape);
+    fixedGround->setWorldTransform(groundTransform);
+    m_dynamicsWorld->addCollisionObject(fixedGround);
 #else
-		localCreateRigidBody(btScalar(0.), groundTransform, groundShape);
-#endif  //CREATE_GROUND_COLLISION_OBJECT
-	}
+    localCreateRigidBody(btScalar(0.), groundTransform, groundShape);
+#endif  // CREATE_GROUND_COLLISION_OBJECT
+  }
 
-	m_dynamicsWorld->getSolverInfo().m_numIterations = 100;
+  m_dynamicsWorld->getSolverInfo().m_numIterations = 100;
 
-	btCollisionShape* shape;
-	btVector3 localInertia(0, 0, 0);
-	btDefaultMotionState* motionState;
-	btTransform bodyTransform;
-	btScalar mass;
-	btTransform localA;
-	btTransform localB;
-	CONSTRAINT_TYPE* constraint;
+  btCollisionShape* shape;
+  btVector3 localInertia(0, 0, 0);
+  btDefaultMotionState* motionState;
+  btTransform bodyTransform;
+  btScalar mass;
+  btTransform localA;
+  btTransform localB;
+  CONSTRAINT_TYPE* constraint;
 
-	//static body centered in the origo
-	mass = 0.0;
-	shape = new btBoxShape(btVector3(0.5, 0.5, 0.5));
-	localInertia = btVector3(0, 0, 0);
-	bodyTransform.setIdentity();
-	motionState = new btDefaultMotionState(bodyTransform);
-	btRigidBody* staticBody = new btRigidBody(mass, motionState, shape, localInertia);
-	m_dynamicsWorld->addRigidBody(staticBody);
+  // static body centered in the origo
+  mass = 0.0;
+  shape = new btBoxShape(btVector3(0.5, 0.5, 0.5));
+  localInertia = btVector3(0, 0, 0);
+  bodyTransform.setIdentity();
+  motionState = new btDefaultMotionState(bodyTransform);
+  btRigidBody* staticBody =
+      new btRigidBody(mass, motionState, shape, localInertia);
+  m_dynamicsWorld->addRigidBody(staticBody);
 
-	/////////// box with undamped translate spring attached to static body
-	/////////// the box should oscillate left-to-right forever
-	{
-		mass = 1.0;
-		shape = new btBoxShape(btVector3(0.5, 0.5, 0.5));
-		shape->calculateLocalInertia(mass, localInertia);
-		bodyTransform.setIdentity();
-		bodyTransform.setOrigin(btVector3(-2, 0, -5));
-		motionState = new btDefaultMotionState(bodyTransform);
-		m_data->m_TranslateSpringBody = new btRigidBody(mass, motionState, shape, localInertia);
-		m_data->m_TranslateSpringBody->setActivationState(DISABLE_DEACTIVATION);
-		m_dynamicsWorld->addRigidBody(m_data->m_TranslateSpringBody);
-		localA.setIdentity();
-		localA.getOrigin() = btVector3(0, 0, -5);
-		localB.setIdentity();
-		constraint = new CONSTRAINT_TYPE(*staticBody, *m_data->m_TranslateSpringBody, localA, localB EXTRAPARAMS);
-		constraint->setLimit(0, 1, -1);
-		constraint->setLimit(1, 0, 0);
-		constraint->setLimit(2, 0, 0);
-		constraint->setLimit(3, 0, 0);
-		constraint->setLimit(4, 0, 0);
-		constraint->setLimit(5, 0, 0);
-		constraint->enableSpring(0, true);
-		constraint->setStiffness(0, 100);
+  /////////// box with undamped translate spring attached to static body
+  /////////// the box should oscillate left-to-right forever
+  {
+    mass = 1.0;
+    shape = new btBoxShape(btVector3(0.5, 0.5, 0.5));
+    shape->calculateLocalInertia(mass, localInertia);
+    bodyTransform.setIdentity();
+    bodyTransform.setOrigin(btVector3(-2, 0, -5));
+    motionState = new btDefaultMotionState(bodyTransform);
+    m_data->m_TranslateSpringBody =
+        new btRigidBody(mass, motionState, shape, localInertia);
+    m_data->m_TranslateSpringBody->setActivationState(DISABLE_DEACTIVATION);
+    m_dynamicsWorld->addRigidBody(m_data->m_TranslateSpringBody);
+    localA.setIdentity();
+    localA.getOrigin() = btVector3(0, 0, -5);
+    localB.setIdentity();
+    constraint =
+        new CONSTRAINT_TYPE(*staticBody, *m_data->m_TranslateSpringBody, localA,
+                            localB EXTRAPARAMS);
+    constraint->setLimit(0, 1, -1);
+    constraint->setLimit(1, 0, 0);
+    constraint->setLimit(2, 0, 0);
+    constraint->setLimit(3, 0, 0);
+    constraint->setLimit(4, 0, 0);
+    constraint->setLimit(5, 0, 0);
+    constraint->enableSpring(0, true);
+    constraint->setStiffness(0, 100);
 #ifdef USE_6DOF2
-		constraint->setDamping(0, 0);
+    constraint->setDamping(0, 0);
 #else
-		constraint->setDamping(0, 1);
+    constraint->setDamping(0, 1);
 #endif
-		constraint->setEquilibriumPoint(0, 0);
-		constraint->setDbgDrawSize(btScalar(2.f));
-		m_dynamicsWorld->addConstraint(constraint, true);
-	}
+    constraint->setEquilibriumPoint(0, 0);
+    constraint->setDbgDrawSize(btScalar(2.f));
+    m_dynamicsWorld->addConstraint(constraint, true);
+  }
 #if 0
 /////////// box with rotate spring, attached to static body
 /////////// box should swing (rotate) left-to-right forever
@@ -256,7 +255,8 @@ void Dof6ConstraintTutorial::initPhysics()
 			constraint->setLimit(5, 0, 0);
 #ifdef USE_6DOF2
 			constraint->setBounce(0,0);
-#else  //bounce is named restitution in 6dofspring, but not implemented for translational limit motor, so the following line has no effect
+#else  // bounce is named restitution in 6dofspring, but not implemented for
+       // translational limit motor, so the following line has no effect
 			constraint->getTranslationalLimitMotor()->m_restitution = 0.0;
 #endif
 			constraint->setParam(BT_CONSTRAINT_STOP_ERP,0.995,0);
@@ -272,7 +272,8 @@ void Dof6ConstraintTutorial::initPhysics()
 			constraint->setLimit(5, 0, 0);
 #ifdef USE_6DOF2
 			constraint->setBounce(0,1);
-#else  //bounce is named restitution in 6dofspring, but not implemented for translational limit motor, so the following line has no effect
+#else  // bounce is named restitution in 6dofspring, but not implemented for
+       // translational limit motor, so the following line has no effect
 			constraint->getTranslationalLimitMotor()->m_restitution = 1.0;
 #endif
 			constraint->setParam(BT_CONSTRAINT_STOP_ERP,0.995,0);
@@ -439,83 +440,81 @@ void Dof6ConstraintTutorial::initPhysics()
 			}
 		}
 #endif
-	m_guiHelper->autogenerateGraphicsObjects(m_dynamicsWorld);
+  m_guiHelper->autogenerateGraphicsObjects(m_dynamicsWorld);
 }
 
-void Dof6ConstraintTutorial::animate()
-{
+void Dof6ConstraintTutorial::animate() {
 /////// servo motor: flip its target periodically
 #ifdef USE_6DOF2
-	static float servoNextFrame = -1;
-	//btScalar pos = m_data->m_ServoMotorConstraint->getRotationalLimitMotor(2)->m_currentPosition;
-	//btScalar target = m_data->m_ServoMotorConstraint->getRotationalLimitMotor(2)->m_servoTarget;
-	if (servoNextFrame < 0)
-	{
-		m_data->m_ServoMotorConstraint->getRotationalLimitMotor(2)->m_servoTarget *= -1;
-		servoNextFrame = 3.0;
-	}
-	servoNextFrame -= m_data->mDt;
+  static float servoNextFrame = -1;
+  // btScalar pos =
+  // m_data->m_ServoMotorConstraint->getRotationalLimitMotor(2)->m_currentPosition;
+  // btScalar target =
+  // m_data->m_ServoMotorConstraint->getRotationalLimitMotor(2)->m_servoTarget;
+  if (servoNextFrame < 0) {
+    m_data->m_ServoMotorConstraint->getRotationalLimitMotor(2)->m_servoTarget *=
+        -1;
+    servoNextFrame = 3.0;
+  }
+  servoNextFrame -= m_data->mDt;
 #endif
 
-	/////// constraint chain: pull the chain left and right periodically
-	static float chainNextFrame = -1;
-	static bool left = true;
-	if (chainNextFrame < 0)
-	{
-		if (!left)
-		{
-			m_data->m_ChainRightBody->setActivationState(ACTIVE_TAG);
-			m_dynamicsWorld->removeConstraint(m_data->m_ChainRightConstraint);
-			m_data->m_ChainLeftConstraint->setDbgDrawSize(btScalar(2.f));
-			m_dynamicsWorld->addConstraint(m_data->m_ChainLeftConstraint, true);
-		}
-		else
-		{
-			m_data->m_ChainLeftBody->setActivationState(ACTIVE_TAG);
-			m_dynamicsWorld->removeConstraint(m_data->m_ChainLeftConstraint);
-			m_data->m_ChainRightConstraint->setDbgDrawSize(btScalar(2.f));
-			m_dynamicsWorld->addConstraint(m_data->m_ChainRightConstraint, true);
-		}
-		chainNextFrame = 3.0;
-		left = !left;
-	}
-	chainNextFrame -= m_data->mDt;
+  /////// constraint chain: pull the chain left and right periodically
+  static float chainNextFrame = -1;
+  static bool left = true;
+  if (chainNextFrame < 0) {
+    if (!left) {
+      m_data->m_ChainRightBody->setActivationState(ACTIVE_TAG);
+      m_dynamicsWorld->removeConstraint(m_data->m_ChainRightConstraint);
+      m_data->m_ChainLeftConstraint->setDbgDrawSize(btScalar(2.f));
+      m_dynamicsWorld->addConstraint(m_data->m_ChainLeftConstraint, true);
+    } else {
+      m_data->m_ChainLeftBody->setActivationState(ACTIVE_TAG);
+      m_dynamicsWorld->removeConstraint(m_data->m_ChainLeftConstraint);
+      m_data->m_ChainRightConstraint->setDbgDrawSize(btScalar(2.f));
+      m_dynamicsWorld->addConstraint(m_data->m_ChainRightConstraint, true);
+    }
+    chainNextFrame = 3.0;
+    left = !left;
+  }
+  chainNextFrame -= m_data->mDt;
 
-	/////// bouncing constraint: push the box periodically
-	m_data->m_BouncingTranslateBody->setActivationState(ACTIVE_TAG);
-	static float bounceNextFrame = -1;
-	if (bounceNextFrame < 0)
-	{
-		m_data->m_BouncingTranslateBody->applyCentralImpulse(btVector3(10, 0, 0));
-		bounceNextFrame = 3.0;
-	}
-	bounceNextFrame -= m_data->mDt;
+  /////// bouncing constraint: push the box periodically
+  m_data->m_BouncingTranslateBody->setActivationState(ACTIVE_TAG);
+  static float bounceNextFrame = -1;
+  if (bounceNextFrame < 0) {
+    m_data->m_BouncingTranslateBody->applyCentralImpulse(btVector3(10, 0, 0));
+    bounceNextFrame = 3.0;
+  }
+  bounceNextFrame -= m_data->mDt;
 
-	m_data->frameID++;
+  m_data->frameID++;
 }
 
-void Dof6ConstraintTutorial::stepSimulation(float deltaTime)
-{
-	//animate();
+void Dof6ConstraintTutorial::stepSimulation(float deltaTime) {
+  // animate();
 
-	//float time = m_data->m_timeSeriesCanvas->getCurrentTime();
+  // float time = m_data->m_timeSeriesCanvas->getCurrentTime();
 
-	float prevPos = m_data->m_TranslateSpringBody->getWorldTransform().getOrigin().x();
-	m_dynamicsWorld->stepSimulation(deltaTime);
-	float xPos = m_data->m_TranslateSpringBody->getWorldTransform().getOrigin().x();
+  float prevPos =
+      m_data->m_TranslateSpringBody->getWorldTransform().getOrigin().x();
+  m_dynamicsWorld->stepSimulation(deltaTime);
+  float xPos =
+      m_data->m_TranslateSpringBody->getWorldTransform().getOrigin().x();
 
-	m_data->m_timeSeriesCanvas->insertDataAtCurrentTime(xPos, 0, true);
-	m_data->m_timeSeriesCanvas->insertDataAtCurrentTime(m_data->m_TranslateSpringBody->getLinearVelocity().x(), 1, true);
+  m_data->m_timeSeriesCanvas->insertDataAtCurrentTime(xPos, 0, true);
+  m_data->m_timeSeriesCanvas->insertDataAtCurrentTime(
+      m_data->m_TranslateSpringBody->getLinearVelocity().x(), 1, true);
 
-	if (deltaTime > 0)
-	{
-		m_data->m_timeSeriesCanvas->insertDataAtCurrentTime((xPos - prevPos) / deltaTime, 2, true);
-	}
-	prevPos = xPos;
-	m_data->m_timeSeriesCanvas->nextTick();
+  if (deltaTime > 0) {
+    m_data->m_timeSeriesCanvas->insertDataAtCurrentTime(
+        (xPos - prevPos) / deltaTime, 2, true);
+  }
+  prevPos = xPos;
+  m_data->m_timeSeriesCanvas->nextTick();
 }
 
-class CommonExampleInterface* Dof6ConstraintTutorialCreateFunc(CommonExampleOptions& options)
-{
-	return new Dof6ConstraintTutorial(options.m_guiHelper);
+class CommonExampleInterface* Dof6ConstraintTutorialCreateFunc(
+    CommonExampleOptions& options) {
+  return new Dof6ConstraintTutorial(options.m_guiHelper);
 }
